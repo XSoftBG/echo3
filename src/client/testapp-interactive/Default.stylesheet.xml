@@ -1,0 +1,34 @@
+<ss>
+ <s n="Default" t="Button">
+  <p t="Border" n="border">2px groove #00ff00</p>
+  <p t="b" n="rolloverEnabled">true</p>
+  <p n="rolloverBackground">#afffaf</p>
+  <p t="b" n="pressedEnabled">true</p>
+  <p n="pressedBackground">#ffafff</p>
+  <p n="foreground">#00007f</p>
+  <p n="insets">5px</p>
+ </s>
+ <s n="DefaultSpaced" t="Row">
+  <p n="cellSpacing">5px</p>
+  <p n="padding">5px</p>
+ </s>
+ <s n="DefaultResizable" t="SplitPane">
+  <p t="b" n="resizable">true</p>
+ </s>
+ <s n="Default" t="WindowPane">
+  <p n="titleForeground">#ffffff</p>
+  <p n="titleBackground">#4f4f7f</p>
+  <p t="FillImageBorder" n="border">
+   <fib bi="17px 23px 23px 17px" ci="8px 14px 14px 8px">
+    <fi u="../image/defaultwindow/BorderTopLeft.png" r="0"/>
+    <fi u="../image/defaultwindow/BorderTop.png" r="x"/>
+    <fi u="../image/defaultwindow/BorderTopRight.png" r="0"/>
+    <fi u="../image/defaultwindow/BorderLeft.png" r="y"/>
+    <fi u="../image/defaultwindow/BorderRight.png" r="y"/>
+    <fi u="../image/defaultwindow/BorderBottomLeft.png" r="0"/>
+    <fi u="../image/defaultwindow/BorderBottom.png" r="x"/>
+    <fi u="../image/defaultwindow/BorderBottomRight.png" r="0"/>
+   </fib>
+  </p>
+ </s>
+</ss>
