@@ -4,3 +4,4 @@ ant clean
 ant
 cp ./dist/lib/Echo3_*.jar ../Dolphin/lib/
 cp ./dist/lib/Echo3_*.jar ../echopoint/lib/
+cp ./dist/lib/Echo3_*.jar ../echolot/echolot-app/lib/

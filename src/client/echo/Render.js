@@ -76,6 +76,7 @@ Echo.Render = {
         
         if (includeSelf) {
             Echo.Render._doRenderDisplayImpl(component);
+            component.fireEvent({type: "displayed", source: component});
         } else {
             if (component.peer.isChildVisible) {
                 for (i = 0; i < component.children.length; ++i) {

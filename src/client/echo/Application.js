@@ -1244,6 +1244,16 @@ Echo.Component = Core.extend({
         }
     },
     
+    removeAllListeners: function(eventType) {
+        if (this._listenerList == null) {
+            return;
+        }
+        this._listenerList.removeAllListeners(eventType);
+        if (this.application) {
+            this.application.notifyComponentUpdate(this, "listeners", eventType, null);
+        }
+    },
+    
     /** 
      * Sets the value of a property in the internal style.
      * 

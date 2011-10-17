@@ -799,13 +799,20 @@ Core.ListenerList = Core.extend({
     removeListener: function(eventType, eventTarget) {
         for (var i = 0; i < this._data.length; i += 2) {
             if (this._data[i] == eventType && eventTarget == this._data[i + 1]) {
-                var oldLength = this._data.length;
                 this._data.splice(i, 2);
                 return;
             }
         }
     },
     
+    removeAllListeners: function(eventType) {
+        for (var i = 0; i < this._data.length; i += 2) {
+            if (this._data[i] == eventType) {
+                this._data.splice(i, 2);
+            }
+        }
+    },
+
     /** @see Object#toString */
     toString: function() {
         var out = "";
