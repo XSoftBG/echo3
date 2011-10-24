@@ -806,13 +806,13 @@ Echo.Component = Core.extend({
      * @param {Function} eventTarget the method to invoke when the event occurs 
      *        (the event will be passed as the single argument)
      */
-    addListener: function(eventType, eventTarget) {
+    addListener: function(eventType, eventTarget, rendered) {
         if (this._listenerList == null) {
             this._listenerList = new Core.ListenerList();
         }
         this._listenerList.addListener(eventType, eventTarget);
         if (this.application) {
-            this.application.notifyComponentUpdate(this, "listeners", null, eventType);
+            this.application.notifyComponentUpdate(this, "listeners", null, eventType, rendered);
         }
     },
     
@@ -1234,23 +1234,23 @@ Echo.Component = Core.extend({
      * @param {Function} eventTarget the method to invoke when the event occurs 
      *        (the event will be passed as the single argument)
      */
-    removeListener: function(eventType, eventTarget) {
+    removeListener: function(eventType, eventTarget, rendered) {
         if (this._listenerList == null) {
             return;
         }
         this._listenerList.removeListener(eventType, eventTarget);
         if (this.application) {
-            this.application.notifyComponentUpdate(this, "listeners", eventType, null);
+            this.application.notifyComponentUpdate(this, "listeners", eventType, rendered);
         }
     },
     
-    removeAllListeners: function(eventType) {
+    removeAllListeners: function(eventType, rendered) {
         if (this._listenerList == null) {
             return;
         }
         this._listenerList.removeAllListeners(eventType);
         if (this.application) {
-            this.application.notifyComponentUpdate(this, "listeners", eventType, null);
+            this.application.notifyComponentUpdate(this, "listeners", eventType, rendered);
         }
     },
     
