@@ -374,6 +374,29 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._tbody = null;
     },
     
+    _style_counter : 0,
+    
+    _handleSelectedForeground: function(td, restore, color) {
+      var id = this.component.renderId.replace('.', '_');
+      var style = document.getElementById('tdSelectionFix' + id);
+      if(restore) {
+        td.className = "";
+        if(--this._style_counter == 0 && style)
+          style.parentNode.removeChild(style);
+      }
+      else {
+        td.className = "fixSelection" + id;
+        ++this._style_counter;
+        if(style || !color)
+          return;
+        style = document.createElement("style");
+        style.type = "text/css";
+        style.id = "tdSelectionFix" + id;
+        style.innerHTML = "td.fixSelection" + id + " [style] { color: " + color + " !important; }";
+        document.getElementsByTagName('head')[0].appendChild(style);
+      }
+    },
+        
     /**
      * Renders an appropriate style for a row (i.e. selected or deselected).
      *
@@ -396,12 +419,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                     Echo.Sync.Color.render(Echo.Sync.RemoteTable.DEFAULT_SELECTION_FOREGROUND, td, "color");
                     Echo.Sync.Color.render(Echo.Sync.RemoteTable.DEFAULT_SELECTION_BACKGROUND, td, "background");
                 } else {
+                    this._handleSelectedForeground(td, false, this.component.render("selectionForeground"));
                     Echo.Sync.Font.renderClear(this.component.render("selectionFont"), td);
-                    Echo.Sync.Color.render(this.component.render("selectionForeground"), td, "color");
+                    //Echo.Sync.Color.render(this.component.render("selectionForeground"), td, "color");
                     Echo.Sync.Color.render(this.component.render("selectionBackground"), td, "background");
                     Echo.Sync.FillImage.render(this.component.render("selectionBackgroundImage"), td);
                 }
             } else {
+                this._handleSelectedForeground(td, true, false);
                 td.style.color = "";
                 td.style.backgroundColor = "";
                 td.style.backgroundImage = "";
