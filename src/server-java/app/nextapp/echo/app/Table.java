@@ -633,16 +633,6 @@ public class Table extends Component {
     }
     
     /**
-     * @see nextapp.echo.app.Component#remove(nextapp.echo.app.Component)
-     */
-    public void remove(Component c) {
-        if (!rendering) {
-            throw new IllegalStateException("Programmatic addition or removal of Table children is prohibited.");
-        }
-        super.remove(c);
-    }
-
-    /**
      * Removes an <code>ActionListener</code> from the <code>Table</code>.
      * <code>ActionListener</code>s will be invoked when the user
      * selects a row.
