@@ -253,8 +253,14 @@ Echo.Render = {
             updates[i].renderContext = {};
         
             peer = updates[i].parent.peer;
-            if (peer == null && updates[i].parent.componentType == "Root") {
-                Echo.Render._loadPeer(client, updates[i].parent);
+            if (peer == null) {
+                if (updates[i].parent.componentType == "Root") {
+                  Echo.Render._loadPeer(client, updates[i].parent); 
+                } else {
+                  // If the peer is not loaded, ignore update!
+                  // Component may not be rendered!
+                  updates[i] = null;
+                }
             }
         }
     
