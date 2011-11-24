@@ -251,7 +251,7 @@ public class Table extends Component {
      */
     public void add(Component c, int n) throws IllegalChildException {
         if (!rendering) {
-            throw new IllegalStateException("Programmatic addition or removal of Table children is prohibited.");
+            throw new IllegalStateException("Programmatic addition of Table children is prohibited.");
         }
         super.add(c, n);
     }
