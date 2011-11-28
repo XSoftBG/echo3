@@ -251,7 +251,7 @@ public class UserInstance implements Serializable {
      * @return the client-side render id
      */
     public String getClientRenderId(Component component) {
-        return "C." + component.getRenderId();
+        return "C." + component.getActiveRenderId();
     }
     
     /**

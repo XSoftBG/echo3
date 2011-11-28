@@ -675,9 +675,11 @@ implements Serializable {
         if (renderId == null || renderIdToComponentMap.containsKey(renderId)) {
             // Note that the render id is reassigned if it currently exists renderIdToComponentMap.  This could be the case
             // in the event a Component was being used in a pool.
-            component.assignRenderId(generateId());
+            renderId = generateId();
+            component.assignRenderId(renderId);            
         }
-        renderIdToComponentMap.put(component.getRenderId(), component);
+        component.assignActiveRenderId(renderId);
+        renderIdToComponentMap.put(renderId, component);
         if (component instanceof ModalSupport && ((ModalSupport) component).isModal()) {
             setModal(component, true);
         }
@@ -836,7 +838,9 @@ implements Serializable {
      * @see Component#register(ApplicationInstance)
      */
     void unregisterComponent(Component component) {
-        renderIdToComponentMap.remove(component.getRenderId());
+        final String renderId = component.getRenderId();
+        component.assignActiveRenderId(renderId);
+        renderIdToComponentMap.remove(renderId);
         if (component instanceof ModalSupport && ((ModalSupport) component).isModal()) {
             setModal(component, false);
         }

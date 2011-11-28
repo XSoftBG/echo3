@@ -286,6 +286,14 @@ implements RenderIdSupport, Serializable {
      */
     private String renderId;
     
+    /**
+     * <b>Last active renderId!</b>
+     * <br />
+     * Set when component is registering to application instance!
+     * @see #renderId
+     */
+    private String activeRenderId;
+    
     /** Shared style. */
     private Style sharedStyle;
     
@@ -464,6 +472,10 @@ implements RenderIdSupport, Serializable {
      */
     void assignRenderId(String renderId) {
         this.renderId = renderId;
+    }
+    
+    void assignActiveRenderId(String activeRenderId) {
+        this.activeRenderId = activeRenderId;
     }
     
     /**
@@ -828,6 +840,14 @@ implements RenderIdSupport, Serializable {
      */
     public String getRenderId() {
         return renderId;
+    }
+    
+    /**
+     * Returns the active render id of this component.
+     * @see #activeRenderId
+     */
+    public String getActiveRenderId() {
+        return activeRenderId;
     }
 
     /**
@@ -1592,7 +1612,8 @@ implements RenderIdSupport, Serializable {
      * @param renderId the new identifier
      */
     public void setRenderId(String renderId) {
-        if (this.renderId != null && renderId != null && this.applicationInstance != null) {
+        //if (this.renderId != null && renderId != null && this.applicationInstance != null) {
+        if (this.renderId != null && this.applicationInstance != null) {
             throw new IllegalStateException("Cannot set renderId while component is registered.");
         }
         if (renderId != null) {
