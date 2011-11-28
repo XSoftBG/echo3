@@ -112,6 +112,11 @@ public class Table extends Component {
     private ListSelectionModel selectionModel;
     private boolean suppressChangeNotifications;
     private boolean rendering = false;
+    private final PropertyChangeListener child_prop_listener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent e) {
+              invalidate();
+          }
+    };
     
     /**
      * Listener to monitor changes to model.
@@ -227,12 +232,7 @@ public class Table extends Component {
         }
         setSelectionModel(new DefaultListSelectionModel());
         setModel(model);
-        
-        addPropertyChangeListener(CHILD_VISIBLE_CHANGED_PROPERTY, new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-                invalidate();
-            }
-        });
+        addPropertyChangeListener(CHILD_VISIBLE_CHANGED_PROPERTY, child_prop_listener);
     }
     
     /**
@@ -251,9 +251,20 @@ public class Table extends Component {
      */
     public void add(Component c, int n) throws IllegalChildException {
         if (!rendering) {
-            throw new IllegalStateException("Programmatic addition or removal of Table children is prohibited.");
+            throw new IllegalStateException("Programmatic addition of Table children is prohibited.");
         }
         super.add(c, n);
+        c.addPropertyChangeListener(PROPERTY_LAYOUT_DATA, child_prop_listener);
+    }
+
+    /**
+     * @see nextapp.echo.app.Component#remove(nextapp.echo.app.Component)
+     */
+    public void remove(Component c) {
+        if (!rendering) {
+          c.removePropertyChangeListener(PROPERTY_LAYOUT_DATA, child_prop_listener);
+        }
+        super.remove(c);
     }
 
     /**
