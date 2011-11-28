@@ -76,7 +76,6 @@ Echo.Render = {
         
         if (includeSelf) {
             Echo.Render._doRenderDisplayImpl(component);
-            component.fireEvent({type: "displayed", source: component});
         } else {
             if (component.peer.isChildVisible) {
                 for (i = 0; i < component.children.length; ++i) {
@@ -254,8 +253,14 @@ Echo.Render = {
             updates[i].renderContext = {};
         
             peer = updates[i].parent.peer;
-            if (peer == null && updates[i].parent.componentType == "Root") {
-                Echo.Render._loadPeer(client, updates[i].parent);
+            if (peer == null) {
+                if (updates[i].parent.componentType == "Root") {
+                  Echo.Render._loadPeer(client, updates[i].parent); 
+                } else {
+                  // If the peer is not loaded, ignore update!
+                  // Component may not be rendered!
+                  updates[i] = null;
+                }
             }
         }
     
@@ -286,12 +291,14 @@ Echo.Render = {
             
             // Perform update by invoking peer's renderUpdate() method.
             var fullRender = peer.renderUpdate(updates[i]);
-            
+            updates[i].parent.fireEvent({type: "updated", source: updates[i].parent, data: updates[i]});
+
             // If the update required re-rendering descendants of the updated component,
             // null-out any pending updates to descendant components.
             if (fullRender) {
                 for (j = i + 1; j < updates.length; ++j) {
                     if (updates[j] != null && updates[i].parent.isAncestorOf(updates[j].parent)) {
+                        updates[j].parent.fireEvent({type: "updated", source: updates[j].parent, data: updates[j]});
                         updates[j] = null;
                     }
                 }
