@@ -442,7 +442,6 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
     },
     
     _performClientUpdates: function() {
-        console.log(this._clientMessage._eventComponentId);
         if (!this._transactionInProgress && !this._syncRequested && this._clientMessage.hasStoredProperties()) {
             this._syncRequested = true;
             this.sync();
