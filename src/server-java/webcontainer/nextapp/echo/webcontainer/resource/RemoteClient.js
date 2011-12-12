@@ -154,6 +154,8 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
      * Events waiting for process.
     */
     _pending_events: null,
+    
+    _clientUpdatesHandler: null,
 
     /**
      * Creates a new RemoteClient instance.
@@ -178,6 +180,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         this._clientMessage = new Echo.RemoteClient.ClientMessage(this, initId);
         this._asyncManager = new Echo.RemoteClient.AsyncManager(this);
         this._pending_events = [];
+        this._clientUpdatesHandler = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._performClientUpdates), 125, false);
     },
     
     /**
@@ -434,6 +437,16 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         if (!stored) {
             this._clientMessage.storeProperty(e.parent.renderId, e.propertyName, e.newValue);
         }
+        
+        Core.Web.Scheduler.update(this._clientUpdatesHandler, true);
+    },
+    
+    _performClientUpdates: function() {
+        console.log(this._clientMessage._eventComponentId);
+        if (!this._transactionInProgress && !this._syncRequested && this._clientMessage.hasStoredProperties()) {
+            this._syncRequested = true;
+            this.sync();
+        }
     },
     
     /**
@@ -473,10 +486,8 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
                     this.configuration["Action.Continue"], null, Echo.Client.STYLE_MESSAGE);
         }
 
-        if( this._pending_events.length > 0 )
-        {
-          var e = this._pending_events.shift();
-          this._processPrendingClientEvent( e );
+        if( this._pending_events.length > 0 ) {
+            this._processPrendingClientEvent(this._pending_events.shift());
         }
     },
     
@@ -551,7 +562,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
             this._inputRestrictionId = this.createInputRestriction();
         }
 
-        this._asyncManager._stop();    
+        this._asyncManager._stop();
         this._syncInitTime = new Date().getTime();
 
         var conn = new Core.Web.HttpConnection(this.getServiceUrl("Echo.Sync"), "POST", 
@@ -967,6 +978,14 @@ Echo.RemoteClient.ClientMessage = Core.extend({
             this._componentIdToPropertyMap[componentId] = propertyMap;
         }
         propertyMap[propertyName] = propertyValue;
+    },
+    
+    hasStoredProperties: function() {
+      for(var property in this._componentIdToPropertyMap) {
+        if(this._componentIdToPropertyMap.hasOwnProperty(property))
+            return true;
+      }
+      return false;
     }
 });
 

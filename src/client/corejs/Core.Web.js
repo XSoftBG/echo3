@@ -2535,10 +2535,14 @@ Core.Web.Scheduler = {
      * Updates a previously added runnable to be executed based on its <code>timeInterval</code> setting.
      * Performs no action if specified runnable is not currently enqueued.
      * 
+     * @param {Boolean} toBeAdded add to Core.Web.Scheduler if specified runnable is not currently enqueued.
      * @param {Core.Web.Scheduler.Runnable} runnable the runnable to update
      */
-    update: function(runnable) {
+    update: function(runnable, toBeAdded) {
         if (Core.Arrays.indexOf(Core.Web.Scheduler._runnables, runnable) == -1) {
+            if (toBeAdded) {
+                Core.Web.Scheduler.add(runnable);
+            }
             return;
         }
         var currentTime = new Date().getTime();
