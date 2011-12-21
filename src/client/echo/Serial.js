@@ -570,6 +570,44 @@ Echo.Serial.Border = Core.extend(Echo.Serial.PropertyTranslator, {
 });
 
 /**
+ * BoxShadow Property Translator Singleton.
+ */
+Echo.Serial.BoxShadow = Core.extend(Echo.Serial.PropertyTranslator, {
+
+    $static: {
+    
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+          var element = Core.Web.DOM.getChildElementByTagName(pElement, "box");
+          return {
+              hShadow: element.getAttribute("h"),
+              vShadow: element.getAttribute("v"),
+              blur: element.getAttribute("b"),
+              spead: element.getAttribute("s"),
+              color: element.getAttribute("c"),
+              style: element.getAttribute("i")
+          };
+        },
+        
+//        /** @see Echo.Serial.PropertyTranslator#toXml */
+//        toXml: function(client, pElement, value) {
+//          
+//            xmlDoc.createElement("edition");
+//          
+//          
+//            pElement.appendChild(pElement.ownerDocument.createTextNode(
+//                    value.getFullYear() + "." + (value.getMonth() + 1) + "." + value.getDate()));
+//        }
+        
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("BoxShadow", this);
+        Echo.Serial.addPropertyTranslator("BS", this);
+    }
+});
+
+/**
  * FillImage Property Translator Singleton.
  */
 Echo.Serial.FillImage = Core.extend(Echo.Serial.PropertyTranslator, {

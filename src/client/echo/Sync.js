@@ -371,6 +371,32 @@ Echo.Sync.Border = {
 };
 
 /**
+ * Provides tools for rendering box shadow properties.
+ * @class
+ */
+Echo.Sync.BoxShadow = {
+  
+    /**
+     * Renders a border to a DOM element.
+     * 
+     * @param {#BoxShadow} border the box shadow to render
+     * @param {Element} the target DOM element
+     * @param {String} styleAttribute the CSS style attribute name (defaults to "boxShadow" if omitted)
+     */
+    render: function(boxShadow, element, styleAttribute) {
+        styleAttribute = styleAttribute ? styleAttribute : "boxShadow";
+        var styleValue = boxShadow.hShadow + " " + 
+                         boxShadow.vShadow + " " +
+                         boxShadow.blur + " " +
+                         boxShadow.spead + " " +
+                         boxShadow.color + " " +
+                         boxShadow.style;
+        
+        element.style[styleAttribute] = styleValue;
+    }
+};
+
+/**
  * Provides tools for rendering color properties.
  * @class
  */
