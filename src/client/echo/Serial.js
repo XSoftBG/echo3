@@ -587,7 +587,7 @@ Echo.Serial.BoxShadow = Core.extend(Echo.Serial.PropertyTranslator, {
               color: element.getAttribute("c"),
               style: element.getAttribute("i")
           };
-        },
+        }
         
 //        /** @see Echo.Serial.PropertyTranslator#toXml */
 //        toXml: function(client, pElement, value) {
