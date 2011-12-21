@@ -46,7 +46,7 @@ public class BoxShadow implements Serializable {
     private final Extent hShadowPos;
     private final Extent vShadowPos;
     private final Extent blurDistance;
-    private final Extent speardSize;
+    private final Extent spreadSize;
     private final Color color;
     private final int style;
 
@@ -59,16 +59,16 @@ public class BoxShadow implements Serializable {
      *        (this property only supports <code>Extent</code>s with fixed (i.e., not percent) units)
      * @param blur the blur distance.
      *        (this property only supports <code>Extent</code>s with fixed (i.e., not percent) units)
-     * @param speard the size of shadow.
+     * @param spread the size of shadow.
      *        (this property only supports <code>Extent</code>s with fixed (i.e., not percent) units)
      * @param color the color of the shadow. Look at CSS Color Values for a complete list of possible color values.
      * @param style changes the shadow from an outer shadow (outset) to an inner shadow.
      */
-    public BoxShadow(Extent hShadow, Extent vShadow, Extent blur, Extent speard, Color color, int style) {
+    public BoxShadow(Extent hShadow, Extent vShadow, Extent blur, Extent spread, Color color, int style) {
       this.hShadowPos = hShadow;
       this.vShadowPos = vShadow;
       this.blurDistance = blur;
-      this.speardSize = speard;
+      this.spreadSize = spread;
       this.color = color;
       this.style = style;
     }
@@ -99,8 +99,8 @@ public class BoxShadow implements Serializable {
       return blurDistance;
     }
 
-    public Extent getSpeardSize() {
-        return speardSize;
+    public Extent getSpreadSize() {
+        return spreadSize;
     }
 
     public Color getColor() {
@@ -132,7 +132,7 @@ public class BoxShadow implements Serializable {
       if (this.blurDistance != other.blurDistance && (this.blurDistance == null || !this.blurDistance.equals(other.blurDistance))) {
           return false;
       }
-      if (this.speardSize != other.speardSize && (this.speardSize == null || !this.speardSize.equals(other.speardSize))) {
+      if (this.spreadSize != other.spreadSize && (this.spreadSize == null || !this.spreadSize.equals(other.spreadSize))) {
           return false;
       }
       if (this.color != other.color && (this.color == null || !this.color.equals(other.color))) {
@@ -151,7 +151,7 @@ public class BoxShadow implements Serializable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return vShadowPos + " " + hShadowPos + " " + blurDistance + " " + speardSize + " " + color + 
+        return vShadowPos + " " + hShadowPos + " " + blurDistance + " " + spreadSize + " " + color + 
                 (style == STYLE_DEFAULT ? "" : style == STYLE_INSET ? "inset" : "outset");
     }
 }

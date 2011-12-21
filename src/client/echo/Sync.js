@@ -374,27 +374,55 @@ Echo.Sync.Border = {
  * Provides tools for rendering box shadow properties.
  * @class
  */
-Echo.Sync.BoxShadow = {
+Echo.Sync.BoxShadow = Core.extend({
   
-    /**
-     * Renders a border to a DOM element.
-     * 
-     * @param {#BoxShadow} border the box shadow to render
-     * @param {Element} the target DOM element
-     * @param {String} styleAttribute the CSS style attribute name (defaults to "boxShadow" if omitted)
-     */
-    render: function(boxShadow, element, styleAttribute) {
-        styleAttribute = styleAttribute ? styleAttribute : "boxShadow";
-        var styleValue = boxShadow.hShadow + " " + 
-                         boxShadow.vShadow + " " +
-                         boxShadow.blur + " " +
-                         boxShadow.spead + " " +
-                         boxShadow.color + " " +
-                         boxShadow.style;
-        
-        element.style[styleAttribute] = styleValue;
+    $static: {
+        STYLE_DEFAULT: "",
+        STYLE_INSET: "inset",
+        STYLE_OUTSET: "outset",
+      
+        /**
+         * Renders a border to a DOM element.
+         * 
+         * @param {#BoxShadow} border the box shadow to render
+         * @param {Element} the target DOM element
+         * @param {String} styleAttribute the CSS style attribute name (defaults to "boxShadow" if omitted)
+         */
+        render: function(boxShadow, element, styleAttribute) {
+            if (!(boxShadow instanceof Echo.Sync.BoxShadow)) {
+                throw new Error("Echo.Sync.BoxShadow.render: unsupported object.");
+            }
+            
+            styleAttribute = styleAttribute ? styleAttribute : "boxShadow";
+            element.style[styleAttribute] = boxShadow.toCSS();
+        }
+    },
+    
+    _hShadowPos: null,
+    _vShadowPos: null,
+    _blur: null,
+    _spread: null,
+    _color: null,
+    _style: null,
+    
+    $construct: function(hShadowPos, vShadowPos, blur, spread, color, style) {
+        if (style !== Echo.Sync.BoxShadow.STYLE_DEFAULT && style !== Echo.Sync.BoxShadow.STYLE_INSET && Echo.Sync.BoxShadow.style !== STYLE_OUTSET) {
+            throw new Error("Echo.Sync.BoxShadow: unknow style -> " + style);
+        }
+        this._hShadowPos = hShadowPos;
+        this._vShadowPos = vShadowPos;
+        this._blur = blur;
+        this._spread = spread;
+        this._color = color;
+        this._style = style;
+    },
+    
+    toCSS: function() {
+      var cssString = this._hShadowPos + " " + this._vShadowPos + " " + this._blur + " " + 
+                      this._spread + " " + this._color + " " + this._style;
+      return cssString;
     }
-};
+});
 
 /**
  * Provides tools for rendering color properties.

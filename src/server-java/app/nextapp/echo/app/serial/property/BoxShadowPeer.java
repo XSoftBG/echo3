@@ -69,7 +69,7 @@ public class BoxShadowPeer implements SerialPropertyPeer {
         boxElement.setAttribute("h", ExtentPeer.toString(boxShadow.getHorizontalShadowPosition()));
         boxElement.setAttribute("v", ExtentPeer.toString(boxShadow.getVerticalShadowPosition()));
         boxElement.setAttribute("b", ExtentPeer.toString(boxShadow.getBlurDistance()));
-        boxElement.setAttribute("s", ExtentPeer.toString(boxShadow.getSpeardSize()));
+        boxElement.setAttribute("s", ExtentPeer.toString(boxShadow.getSpreadSize()));
         boxElement.setAttribute("c", ColorPeer.toString(boxShadow.getColor()));
         boxElement.setAttribute("i", STYLE_CONSTANT_MAP.get(boxShadow.getStyle()));
         

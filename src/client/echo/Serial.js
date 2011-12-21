@@ -579,14 +579,14 @@ Echo.Serial.BoxShadow = Core.extend(Echo.Serial.PropertyTranslator, {
         /** @see Echo.Serial.PropertyTranslator#toProperty */
         toProperty: function(client, pElement) {
           var element = Core.Web.DOM.getChildElementByTagName(pElement, "box");
-          return {
-              hShadow: element.getAttribute("h"),
-              vShadow: element.getAttribute("v"),
-              blur: element.getAttribute("b"),
-              spead: element.getAttribute("s"),
-              color: element.getAttribute("c"),
-              style: element.getAttribute("i")
-          };
+          return new Echo.Sync.BoxShadow(
+              element.getAttribute("h"), 
+              element.getAttribute("v"), 
+              element.getAttribute("b"), 
+              element.getAttribute("s"), 
+              element.getAttribute("c"), 
+              element.getAttribute("i")
+            );
         }
         
 //        /** @see Echo.Serial.PropertyTranslator#toXml */
