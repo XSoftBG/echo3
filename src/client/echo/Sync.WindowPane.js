@@ -654,6 +654,8 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             this._div.style.visibility = "hidden";
         }
         
+        Echo.Sync.BoxShadow.renderClear(this.component.render("boxShadow"), this._div);
+        
         this._borderDivs = Echo.Sync.FillImageBorder.getBorder(this._div);
         var mouseDownHandler = this._resizable ? Core.method(this, this._processBorderMouseDown) : null; 
         for (var i = 0; i < 8; ++i) {
