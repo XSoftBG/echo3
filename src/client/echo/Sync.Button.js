@@ -123,19 +123,19 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
          * @param {Boolean} pressed the new pressed state
          */
         setHighlightState: function(rollover, pressed) {
-            var focused = this.component && this.component.application && 
-                    this.component.application.getFocusedComponent() == this.component;
+//            var focused = this.component && this.component.application && this.component.application.getFocusedComponent() == this.component;
             
             // Determine effect property name.  Priorities are 1: pressed, 2: rollover: 3: focused.
             var ep = pressed ? "pressed" : (rollover ? "rollover" : "focused");
-            var state = focused || pressed || rollover;
+            var state = this._focused || pressed || rollover;
 
             var foreground = Echo.Sync.getEffectProperty(this.component, "foreground", ep + "Foreground", state);
-            var background = Echo.Sync.getEffectProperty(this.component, "background", ep + "Background", state);
+            var background = Echo.Sync.getEffectProperty(this.component, "background", ep + "Background", state);            
             var backgroundImage = Echo.Sync.getEffectProperty(
                     this.component, "backgroundImage", ep + "BackgroundImage", state);
             var font = Echo.Sync.getEffectProperty(this.component, "font", ep + "Font", state);
             var border = Echo.Sync.getEffectProperty(this.component, "border", ep + "Border", state);
+            var boxShadow  = Echo.Sync.getEffectProperty(this.component, "boxShadow", ep + "BoxShadow", state);
             
             Echo.Sync.Color.renderClear(foreground, this.div, "color");
             Echo.Sync.Color.renderClear(background, this.div, "backgroundColor");
@@ -146,7 +146,9 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             } else {
                 Echo.Sync.Insets.render(this.component.render("insets"), this.div, "padding");
             }
+            
             Echo.Sync.Border.renderClear(border, this.div);
+            Echo.Sync.BoxShadow.renderClear(boxShadow, this.div);
 
             if (this._textElement) {
                 Echo.Sync.Font.renderClear(font, this._textElement);

@@ -40,8 +40,7 @@ public class BoxShadow implements Serializable {
     private static final long serialVersionUID = 20111221L;
     
     public static final int STYLE_DEFAULT = 0;    
-    public static final int STYLE_INSET   = 1;    
-    public static final int STYLE_OUTSET  = 2;
+    public static final int STYLE_INSET   = 1;
         
     private final Extent hShadowPos;
     private final Extent vShadowPos;

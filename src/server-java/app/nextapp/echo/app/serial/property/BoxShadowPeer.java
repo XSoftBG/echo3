@@ -52,7 +52,6 @@ public class BoxShadowPeer implements SerialPropertyPeer {
     static {
         STYLE_CONSTANT_MAP.add(BoxShadow.STYLE_DEFAULT, "");
         STYLE_CONSTANT_MAP.add(BoxShadow.STYLE_INSET,   "inset");
-        STYLE_CONSTANT_MAP.add(BoxShadow.STYLE_OUTSET,  "outset");
     }
         
     /**
