@@ -678,7 +678,6 @@ implements Serializable {
             renderId = generateId();
             component.assignRenderId(renderId);            
         }
-        component.assignActiveRenderId(renderId);
         renderIdToComponentMap.put(renderId, component);
         if (component instanceof ModalSupport && ((ModalSupport) component).isModal()) {
             setModal(component, true);
@@ -839,7 +838,7 @@ implements Serializable {
      */
     void unregisterComponent(Component component) {
         final String renderId = component.getRenderId();
-        component.assignActiveRenderId(renderId);
+        component.assignLastRenderId(renderId);
         renderIdToComponentMap.remove(renderId);
         if (component instanceof ModalSupport && ((ModalSupport) component).isModal()) {
             setModal(component, false);
