@@ -407,7 +407,11 @@ class OutputProcessor {
             Set removedIdSet = new HashSet(); // Set containing removed ids, to avoid removing same id multiple times.
             StringBuffer out = new StringBuffer();
             for (int j = 0; j < removedChildren.length; ++j) {
-                String renderId = userInstance.getClientRenderId(removedChildren[j]);
+                String renderId = removedChildren[j].getLastRenderId();
+                if (renderId != null)
+                  renderId = userInstance.getClientRenderId(renderId);
+                else
+                  renderId = userInstance.getClientRenderId(removedChildren[j]);
                 if (removedIdSet.contains(renderId)) {
                     continue;
                 }
