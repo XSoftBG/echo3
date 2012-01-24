@@ -251,7 +251,17 @@ public class UserInstance implements Serializable {
      * @return the client-side render id
      */
     public String getClientRenderId(Component component) {
-        return "C." + component.getActiveRenderId();
+        return getClientRenderId(component.getRenderId());
+    }
+    
+    /**
+     * @see UserInstance#getClientRenderId(nextapp.echo.app.Component)
+     * 
+     * @param componentRenderId component render id
+     * @return the client-side render id
+     */
+    public String getClientRenderId(final String componentRenderId) {
+        return "C."+ componentRenderId;
     }
     
     /**
