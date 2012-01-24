@@ -290,10 +290,10 @@ implements RenderIdSupport, Serializable {
     /**
      * <b>Last active renderId!</b>
      * <br />
-     * Set when component is registering to application instance!
+     * Set when component is unregistering from application instance!
      * @see #renderId
      */
-    private String activeRenderId;
+    private String lastRenderId;
     
     /** Shared style. */
     private Style sharedStyle;
@@ -475,8 +475,8 @@ implements RenderIdSupport, Serializable {
         this.renderId = renderId;
     }
     
-    void assignActiveRenderId(String activeRenderId) {
-        this.activeRenderId = activeRenderId;
+    void assignLastRenderId(String renderId) {
+        this.lastRenderId = renderId;
     }
     
     /**
@@ -857,10 +857,10 @@ implements RenderIdSupport, Serializable {
     
     /**
      * Returns the active render id of this component.
-     * @see #activeRenderId
+     * @see #lastRenderId
      */
-    public String getActiveRenderId() {
-        return activeRenderId;
+    public String getLastRenderId() {
+        return lastRenderId;
     }
 
     /**
