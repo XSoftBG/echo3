@@ -161,6 +161,10 @@ Echo.Application = Core.extend({
     addListener: function(eventType, eventTarget) {
         this._listenerList.addListener(eventType, eventTarget);
     },
+			       
+    hasComponentUpdateListeners: function() {
+      return this._listenerList.hasListeners("componentUpdate");
+    },
     
     /**
      * Invoked by application container to dispose of the application.
@@ -317,7 +321,9 @@ Echo.Application = Core.extend({
             this._listenerList.fireEvent({type: "componentUpdate", parent: parent, propertyName: propertyName, 
                     oldValue: oldValue, newValue: newValue});
         }
-        if (!rendered) {
+        // only if parent is rendered (peer is loaded) OR componentType is Root
+		// Echo.Component that have componentType == "Root" their peers are loaded from Render.processUpdates(client))
+        if ((parent.peer || parent.componentType == "Root") && !rendered) {
             this.updateManager._processComponentUpdate(parent, propertyName, oldValue, newValue);
         }
     },
@@ -1932,6 +1938,11 @@ Echo.Update.ComponentUpdate = Core.extend({
      * the notion that listeners of a type have been added or removed.
      */
     _listenerUpdates: null,
+    
+	/**
+	  * Indicates that current update is processed.
+	  */
+    _processed: false,
 
     /**
      * Creates a new ComponentUpdate.
@@ -2304,6 +2315,23 @@ Echo.Update.ComponentUpdate = Core.extend({
         }
         var propertyUpdate = new Echo.Update.ComponentUpdate.PropertyUpdate(oldValue, newValue);
         this._propertyUpdates[propertyName] = propertyUpdate;
+     },
+    
+	/**
+	 * Mark a current update as processed. (from Echo.Render.processUpdates(client))
+	 */
+    markAsProcessed: function() {
+      this._processed = true;
+    },
+    
+	/**
+	 * Checks whether the current update is processed!
+	 *
+     * @return processed whether or not
+     * @type boolean
+	 */
+    isProcessed: function() {
+      return this._processed;
     }
 });
 
@@ -2651,16 +2679,29 @@ Echo.Update.Manager = Core.extend({
     },
 
     /**
-     * Purges all updates from the manager.
+     * Purges updates that are processed from the manager.
      * Invoked after the client has repainted the screen.
      */
     purge: function() {
-        this.fullRefreshRequired = false;
-        this._componentUpdateMap = { };
-        this._idMap = { };
-        this._removedIdMap = { };
-        this._hasUpdates = false;
-        this._lastAncestorTestParentId = null;
+        var key = null;
+		this._hasUpdates = false;
+        for (key in this._componentUpdateMap) {
+            var update = this._componentUpdateMap[key];
+            if (update.isProcessed()) {                
+                delete this._componentUpdateMap[key];
+                delete this._idMap[update.parent.renderId];
+                delete this._removedIdMap[update.parent.renderId];
+            }
+            else {
+				// has unprocessed updates (e.g: set property from renderUpdate(update))
+				this._hasUpdates = true;
+            }
+        }
+        
+        if (!this._hasUpdates) {
+			this.fullRefreshRequired = false;
+			this._lastAncestorTestParentId = null;
+        }
     },
     
     /**

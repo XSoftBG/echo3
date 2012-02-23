@@ -150,12 +150,15 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
      */
     transactionId: 0,
 
-    /*
+    /**
      * Events waiting for process.
-    */
+     */
     _pending_events: null,
     
-    _clientUpdatesHandler: null,
+	/**
+	 * MethodRunnable that handle client async property updates.
+	 */
+    _asyncUpdatesHandler: null,
 
     /**
      * Creates a new RemoteClient instance.
@@ -180,7 +183,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         this._clientMessage = new Echo.RemoteClient.ClientMessage(this, initId);
         this._asyncManager = new Echo.RemoteClient.AsyncManager(this);
         this._pending_events = [];
-        this._clientUpdatesHandler = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._performClientUpdates), 125, false);
+        this._asyncUpdatesHandler = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._performAsyncUpdates), 250, false);
     },
     
     /**
@@ -398,12 +401,13 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
     },
     
     _processPrendingClientEvent: function(e) {
-        this._clientMessage.setEvent(e.source.renderId, e.type, e.data);
-        if (!this._inputRestrictionId) {
+		this._clientMessage.setEvent(e.source.renderId, e.type, e.data);
+		this._syncRequested = true;
+		Core.Web.Scheduler.run(Core.method(this, this.sync));
+
+        /* if (!this._inputRestrictionId) {
            this._inputRestrictionId = this.createInputRestriction();
-        }
-        this._syncRequested = true;
-        Core.Web.Scheduler.run(Core.method(this, this.sync));
+        }*/
     },
 
     /**
@@ -426,22 +430,34 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
      * @param e the property update event from the component
      */
     _processClientUpdate: function(e) {
-        if (this._transactionInProgress) {
-            return;
-        }
-        
-        var stored = false;
-        if (e.parent.peer.storeProperty) {
-            stored = e.parent.peer.storeProperty(this._clientMessage, e.propertyName);
-        }
-        if (!stored) {
-            this._clientMessage.storeProperty(e.parent.renderId, e.propertyName, e.newValue);
-        }
-        
-        Core.Web.Scheduler.update(this._clientUpdatesHandler, true);
+		if (this._processServerMessage) {
+		  // ignore updates thas is from serverMessage
+		} else {
+			this._storeUpdateProperty(e);
+			if (!this._transactionInProgress) {
+				// has an asynchronous update (e.g: timer periodically set a property)
+				Core.Web.Scheduler.update(this._asyncUpdatesHandler, true);
+			}
+		}
     },
-    
-    _performClientUpdates: function() {
+
+	/**
+	 * Store property update from the component. (by peer or clientMessage)
+	 *
+	 * @param e the property update event from the component
+	 */
+	_storeUpdateProperty: function(e) {
+		if (e.parent.peer && e.parent.peer.storeProperty && e.parent.peer.storeProperty(this._clientMessage, e.propertyName)) {
+			// property is stored by peer
+		} else {
+			this._clientMessage.storeProperty(e.parent.renderId, e.propertyName, e.newValue);
+		}
+	},
+
+	/**
+	 * Invoked when there is asynchronous property updates.
+	 */
+    _performAsyncUpdates: function() {
         if (!this._transactionInProgress && !this._syncRequested && this._clientMessage.hasStoredProperties()) {
             this._syncRequested = true;
             this.sync();
@@ -454,6 +470,8 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
      * @param e the server message completion event
      */
     _processSyncComplete: function(e) {
+		this._processServerMessage = false;
+
         // Mark time of serialization completion with profiling timer.
         if (Echo.Client.profilingTimer) {
             Echo.Client.profilingTimer.mark("ser");
@@ -463,7 +481,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         this._executeCommands();
 
         // Register component update listener 
-        this.application.addListener("componentUpdate", this._processClientUpdateRef);
+        // this.application.addListener("componentUpdate", this._processClientUpdateRef);
         
         // Flag transaction as being complete.
         this._transactionInProgress = false;
@@ -485,9 +503,15 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
                     this.configuration["Action.Continue"], null, Echo.Client.STYLE_MESSAGE);
         }
 
-        if( this._pending_events.length > 0 ) {
-            this._processPrendingClientEvent(this._pending_events.shift());
-        }
+        if (this._pending_events.length > 0) {
+			// if have pending events no need to check for "subupdates"
+			this._processPrendingClientEvent(this._pending_events.shift());
+        } else if (this.application.updateManager.hasUpdates()) {
+			// current updates have created a new updates
+			// make a new synchronization
+			this._syncRequested = true;
+			Core.Web.Scheduler.run(Core.method(this, this.sync));
+		}
     },
     
     /**
@@ -517,7 +541,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         
         // Remove component update listener from application.  This listener is listening
         // for user input.  
-        this.application.removeListener("componentUpdate", this._processClientUpdateRef);
+        // this.application.removeListener("componentUpdate", this._processClientUpdateRef);
         
         // Create new ServerMessage object with response document.
         var serverMessage = new Echo.RemoteClient.ServerMessage(this, responseDocument);
@@ -529,6 +553,7 @@ Echo.RemoteClient = Core.extend(Echo.Client, {
         serverMessage.addCompletionListener(Core.method(this, this._processSyncComplete));
         
         // Start server message processing.
+		this._processServerMessage = true;
         serverMessage.process();
     },
     
