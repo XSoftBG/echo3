@@ -30,7 +30,10 @@
 package nextapp.echo.webcontainer.service;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.AccessControlException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import nextapp.echo.webcontainer.Connection;
 import nextapp.echo.webcontainer.Service;
@@ -42,16 +45,40 @@ import nextapp.echo.webcontainer.util.Resource;
  * A service which renders <code>JavaScript</code> resource files.
  */
 public class JavaScriptService 
-implements Service {
+implements Service, StringVersionService {
     
+    private static final String PROPERTY_ALLOW_IE_COMPRESSION = "echo.allowiecompression";
+    private static final String PROPERTY_ENABLE_JS_CACHING = "echo.js.enablecaching";
+    private static final String PROPERTY_JS_CACHE_SECONDS = "echo.js.cacheseconds";
+	
     private static boolean allowIEcompression = false;
     static {
         try {
-            if ("true".equals(System.getProperty("echo.allowiecompression"))) {
+            if ("true".equals(System.getProperty(PROPERTY_ALLOW_IE_COMPRESSION, "false"))) {
                 allowIEcompression = true;
             }
         }
-        catch (AccessControlException ignored) {} // if running under a security manager
+        catch(AccessControlException ignored) {}
+    }
+    
+    private static boolean allowCaching = false;
+    static {
+        try {
+            if ("true".equals(System.getProperty(PROPERTY_ENABLE_JS_CACHING, "false"))) {
+                allowCaching = true;
+            }
+        }
+        catch(AccessControlException ignored) {}
+    }
+    
+    private static long cacheSeconds = -1l;
+    static {
+    try {
+        if (System.getProperty(PROPERTY_JS_CACHE_SECONDS) != null) {
+            cacheSeconds = Long.valueOf(System.getProperty(PROPERTY_JS_CACHE_SECONDS)).longValue();
+        }
+    }
+    catch(AccessControlException ignored) {}
     }
     
     /**
@@ -85,7 +112,10 @@ implements Service {
     
     /** The JavaScript content in GZip compressed form. */
     private byte[] gzipContent;
-    
+   
+    /** The MD5 hash in the case that caching is enabled */
+    private String stringVersion;
+
     /**
      * Creates a new <code>JavaScriptService</code>.
      * 
@@ -101,6 +131,17 @@ implements Service {
         } catch (IOException ex) {
             // Should not occur.
             throw new RuntimeException("Exception compressing JavaScript source.", ex);
+        }
+        
+        if (allowCaching) {
+            try {
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                md5.update(content.getBytes());
+                BigInteger hash = new BigInteger(1, md5.digest());
+                stringVersion = hash.toString(16);
+            } catch (NoSuchAlgorithmException nsae) {
+                System.err.println("Unable to generate MD5 hash for javascript contents - caching will not be enabled");
+            }
         }
     }
     
@@ -119,14 +160,39 @@ implements Service {
      * @see Service#getVersion()
      */
     public int getVersion() {
-        return DO_NOT_CACHE;
+        if (allowCaching) {
+            return 0;
+        }
+        else {
+            return DO_NOT_CACHE;
+        }
     }
+	
+    /**
+     * @see StringVersionService#getVersionAsString()
+     */
+    public String getVersionAsString() {
+        if (allowCaching) {
+            return stringVersion;
+        }
+        else {
+            return null;
+        }
+     }
     
     /**
      * @see Service#service(nextapp.echo.webcontainer.Connection)
      */
     public void service(Connection conn) 
     throws IOException {
+        /*
+         * Apply our specific cache seconds value if it has been specified
+         * using the system property.
+         */
+        if (cacheSeconds != -1l) {
+            conn.getResponse().setHeader("Cache-Control", "max-age=" + String.valueOf(cacheSeconds) + ", public");
+            conn.getResponse().setDateHeader("Expires", System.currentTimeMillis() + (cacheSeconds * 1000));
+        }
         String userAgent = conn.getRequest().getHeader("user-agent");
         if (!allowIEcompression && (userAgent == null || userAgent.indexOf("MSIE") != -1)) {
             // Due to behavior detailed Microsoft Knowledge Base Article Id 312496, 

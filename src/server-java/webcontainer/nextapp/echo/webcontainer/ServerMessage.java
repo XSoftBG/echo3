@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import nextapp.echo.app.util.DomUtil;
+import nextapp.echo.webcontainer.service.StringVersionService;
 
 /**
  * The outgoing XML message which synchronizes the state of the client to that
@@ -100,8 +101,17 @@ public class ServerMessage {
         if (addedLibraries.contains(serviceId)) {
             return;
         }
-        Element libraryElement = document.createElement("lib");
-        libraryElement.appendChild(document.createTextNode(serviceId));
+        Element libraryElement = document.createElement("lib");		
+        StringBuffer nodeText = new StringBuffer(serviceId);
+        Service service = WebContainerServlet.getServiceRegistry().get(serviceId);
+        if (service instanceof StringVersionService) {
+            StringVersionService svs = (StringVersionService) service;
+            if (svs.getVersionAsString() != null) {
+                nodeText.append("&v=");
+                nodeText.append(((StringVersionService)service).getVersionAsString());
+            }
+        }
+        libraryElement.appendChild(document.createTextNode(nodeText.toString()));		
         librariesElement.appendChild(libraryElement);
         addedLibraries.add(serviceId);
     }
@@ -130,7 +140,7 @@ public class ServerMessage {
     public Element getPartGroup(String groupId) {
         NodeList groupList = serverMessageElement.getElementsByTagName("group");
         int length = groupList.getLength();
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; i++) {
             Element groupElement = (Element) groupList.item(i);
             if (groupId.equals(groupElement.getAttribute("i"))) {
                 return groupElement;

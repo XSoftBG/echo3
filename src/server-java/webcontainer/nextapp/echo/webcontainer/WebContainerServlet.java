@@ -420,8 +420,8 @@ public abstract class WebContainerServlet extends HttpServlet {
                 // with Internet Explorer 6.  Without "Last-Modified", IE6 appears to not
                 // cache images properly resulting in an substantially greater than expected
                 // performance impact.
-                response.setHeader("Cache-Control", "max-age=3600");
-                response.setDateHeader("Expires", System.currentTimeMillis() + (86400000));
+                response.setHeader("Cache-Control", "max-age=3600, public");
+                response.setDateHeader("Expires", System.currentTimeMillis() + (3600 * 1000));
                 response.setDateHeader("Last-Modified", startupTime);
             } else {
                 response.setHeader("Pragma", "no-cache");
