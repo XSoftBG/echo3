@@ -62,7 +62,8 @@ implements Serializable {
     public static final String LOCALE_CHANGED_PROPERTY = "locale";
     public static final String MODAL_COMPONENTS_CHANGED_PROPERTY = "modalComponents";
     public static final String STYLE_SHEET_CHANGED_PROPERTY = "styleSheet";
-    public static final String WINDOWS_CHANGED_PROPERTY = "windows";
+    public static final String WINDOWS_CHANGED_PROPERTY = "windows";    
+    public static final String LAST_ENQUEUE_TASK_PROPERTY = "lastEnqueueTask";
     
     /** 
      * A <code>ThreadLocal</code> reference to the 
@@ -343,6 +344,7 @@ implements Serializable {
                 taskQueueMap.put(taskQueue, taskList);
             }
             taskList.add(task);
+            firePropertyChange(LAST_ENQUEUE_TASK_PROPERTY, null, new Long(System.currentTimeMillis()));
         }
     }
     

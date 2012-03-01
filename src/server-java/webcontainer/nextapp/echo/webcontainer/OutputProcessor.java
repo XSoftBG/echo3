@@ -202,6 +202,7 @@ class OutputProcessor {
     private void renderAsyncState() {
         if (userInstance.getApplicationInstance().hasTaskQueues()) {
             serverMessage.setAttribute("async-interval", Integer.toString(userInstance.getCallbackInterval()));
+            serverMessage.setAttribute("ws-enable", Boolean.toString(conn.getServlet().hasWebSocketConnectionHandler()));
         }
     }
     

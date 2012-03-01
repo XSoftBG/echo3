@@ -31,6 +31,7 @@ package nextapp.echo.webcontainer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
@@ -47,6 +50,7 @@ import nextapp.echo.app.Component;
 import nextapp.echo.app.TaskQueueHandle;
 import nextapp.echo.app.update.ServerComponentUpdate;
 import nextapp.echo.app.update.UpdateManager;
+import nextapp.echo.webcontainer.service.AsyncMonitorService;
 import nextapp.echo.webcontainer.util.IdTable;
 
 /**
@@ -87,6 +91,11 @@ public class UserInstance implements Serializable {
     private ApplicationInstance applicationInstance;
     
     /**
+     * The <code>ApplicationWebSocket</code>.
+     */
+    private ApplicationWebSocket applicationWebSocket;
+    
+    /**
      * <code>ClientConfiguration</code> information containing 
      * application-specific client behavior settings.
      */
@@ -107,14 +116,18 @@ public class UserInstance implements Serializable {
      * <code>PropertyChangeListener</code> for supported <code>ApplicationInstance</code>.
      */
     private PropertyChangeListener applicationPropertyChangeListener = new SerializablePropertyChangeListener() {
-    
         /**
          * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
          */
         public void propertyChange(PropertyChangeEvent e) {
-            if (ApplicationInstance.STYLE_SHEET_CHANGED_PROPERTY.equals(e.getPropertyName())) {
+            String propertyName = e.getPropertyName();
+            if (ApplicationInstance.LAST_ENQUEUE_TASK_PROPERTY.equals(propertyName)) {
+                if (applicationWebSocket != null && applicationWebSocket.isOpen()) {
+                    UserInstance.this.applicationWebSocket.sendMessage(AsyncMonitorService.REQUEST_SYNC_ATTR);
+                }
+            } else if (ApplicationInstance.STYLE_SHEET_CHANGED_PROPERTY.equals(propertyName)) {
                 updatedPropertyNames.add(ApplicationInstance.STYLE_SHEET_CHANGED_PROPERTY);
-            }
+            } 
         }
     };
     
@@ -189,6 +202,16 @@ public class UserInstance implements Serializable {
      */
     public ApplicationInstance getApplicationInstance() {
         return applicationInstance;
+    }
+    
+    /**
+     * Returns the corresponding <code>ApplicationWebSocket</code>
+     * for this user instance.
+     * 
+     * @return the relevant <code>ApplicationWebSocket</code>
+     */
+    public ApplicationWebSocket getApplicaitonWebSocket() {
+        return applicationWebSocket;
     }
     
     /**
@@ -443,6 +466,7 @@ public class UserInstance implements Serializable {
     public void dispose() {
         if (applicationInstance != null) {
             try {
+                System.out.println("dispose");
                 ApplicationInstance.setActive(applicationInstance);
                 applicationInstance.removePropertyChangeListener(applicationPropertyChangeListener);
                 applicationInstance.dispose();
@@ -458,13 +482,14 @@ public class UserInstance implements Serializable {
      * The <code>ApplicationInstance</code> will not be initialized until
      * <code>getApplicationInstance()</code> is invoked for the first time.
      *
-     * @param conn the relevant <code>Connection</code>
+     * @param conn the relevant <code>HTTPConnection</code>
      */
-    public void init(Connection conn) {
+    public void initHTTP(Connection conn) {
         if (initialized) {
             throw new IllegalStateException("Attempt to invoke UserInstance.init() on initialized instance.");
         }
-        WebContainerServlet servlet = (WebContainerServlet) conn.getServlet();
+        WebContainerServlet servlet = conn.getServlet();
+        
         applicationInstance = servlet.newApplicationInstance();
         applicationInstance.addPropertyChangeListener(applicationPropertyChangeListener);
         
@@ -482,6 +507,10 @@ public class UserInstance implements Serializable {
      */
     public boolean isInitialized() {
         return initialized;
+    }
+    
+    public void initWS(WSConnection conn) {
+        this.applicationWebSocket = conn.getApplicationWebSocket();
     }
     
     /**

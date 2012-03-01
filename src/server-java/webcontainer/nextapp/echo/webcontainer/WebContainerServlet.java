@@ -252,6 +252,8 @@ public abstract class WebContainerServlet extends HttpServlet {
     /** Collection of CSS style sheet <code>Service</code>s which should be initially loaded. */
     private List initStyleSheets = null;
     
+    private WebSocketConnectionHandler wsHandler = null;
+    
     /**
      * Default constructor.
      */
@@ -294,6 +296,19 @@ public abstract class WebContainerServlet extends HttpServlet {
 
         services.add(service);
         initStyleSheets.add(service);
+    }
+    
+    protected final void setWebSocketConnectionHandler(WebSocketConnectionHandler handler) {
+        this.wsHandler = handler;
+        this.wsHandler.assignParent(this);
+    }
+    
+    protected final void removeWebSocketConnectionHandler() {
+        this.wsHandler = null;
+    }
+    
+    public final boolean hasWebSocketConnectionHandler() {
+        return this.wsHandler != null;
     }
     
     /**
