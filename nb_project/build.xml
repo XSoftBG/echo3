@@ -79,4 +79,7 @@
             <fileset dir="${src.client.echo.dir}" />
         </copy>
     </target>
+    <target name="-post-jar">
+        <copy file="${dist.jar}" todir="${jar.copy.dolphin.dir}"/>
+    </target>
 </project>

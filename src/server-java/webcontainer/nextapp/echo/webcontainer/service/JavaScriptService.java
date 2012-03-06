@@ -54,7 +54,7 @@ implements Service, StringVersionService {
     private static boolean allowIEcompression = false;
     static {
         try {
-            if ("true".equals(System.getProperty(PROPERTY_ALLOW_IE_COMPRESSION, "false"))) {
+            if (Boolean.valueOf(System.getProperty(PROPERTY_ALLOW_IE_COMPRESSION, "false"))) {
                 allowIEcompression = true;
             }
         }
@@ -64,7 +64,7 @@ implements Service, StringVersionService {
     private static boolean allowCaching = false;
     static {
         try {
-            if ("true".equals(System.getProperty(PROPERTY_ENABLE_JS_CACHING, "false"))) {
+            if (Boolean.valueOf(System.getProperty(PROPERTY_ENABLE_JS_CACHING, "false"))) {
                 allowCaching = true;
             }
         }

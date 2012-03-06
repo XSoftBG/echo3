@@ -696,9 +696,14 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
         RQ_SYNC_MESSAGE: "request-sync",
         
         /**
-         * Exit code when the user opens a new socket. (e.g: new browser tab).
+         * Close code when the user opens a new socket. (e.g: new browser tab).
          */
-        USER_OPEN_NEW_SOCKET: 8807
+        SYNC_CLOSE_CODE: 8807,
+        
+        /**
+         * Close code when application instance is disposed.
+         */
+        DISPOSE_CLOSE_CODE: 8806
     },
     
     /**
@@ -781,7 +786,10 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
                 }
                 break;
             case Core.Web.WebSocketConnection.EVENT_CLOSE:
-                if (e.data.code == Echo.RemoteClient.WebSocketAsyncManager.USER_OPEN_NEW_SOCKET 
+                if (e.data.code == Echo.RemoteClient.WebSocketAsyncManager.DISPOSE_CLOSE_CODE) {
+                    this._client.fail(e.data.reason);
+                }
+                else if (e.data.code == Echo.RemoteClient.WebSocketAsyncManager.SYNC_CLOSE_CODE 
                   || ++this._failedConnectAttempts >= Echo.RemoteClient.AbstractAsyncManager.MAX_CONNECT_ATTEMPTS) {
                     this._notifyForNetworkError();
                 } else {

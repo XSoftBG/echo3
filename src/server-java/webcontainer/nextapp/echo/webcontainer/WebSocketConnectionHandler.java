@@ -74,9 +74,9 @@ public abstract class WebSocketConnectionHandler {
         WSConnection conn = null;
         try {
             conn = new WSConnection(servlet, request, protocol);
-            System.out.println("WSCH: process!");
+            // Log.log("WSCH: process!");
             if (!conn.isInitialized()) {
-                System.out.println("WSCH: process [new web socket]!");
+                // Log.log("WSCH: process [new web socket]!");
                 HttpSession session = request.getSession();
                 if (session == null) {
                     throw new RuntimeException("WebSocketConnectionHandler: initialization of WSConnection is impossible without session!");

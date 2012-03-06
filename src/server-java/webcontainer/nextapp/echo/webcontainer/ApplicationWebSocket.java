@@ -39,7 +39,8 @@ import nextapp.echo.app.util.Uid;
  * @author Miro Yozov
  */
 public abstract class ApplicationWebSocket {
-    private static int CLOSE_CODE = 8807;
+    private static int SYNC_CLOSE_CODE = 8807;
+    private static int DISPOSE_CLOSE_CODE = 8806;
     
     public interface Connection {
         public void close();
@@ -51,16 +52,16 @@ public abstract class ApplicationWebSocket {
     private Connection conn = null;
     
     protected final void processOpen(ApplicationWebSocket.Connection conn) {
-        Log.log("ApplicationWebSocket: [open new]");        
+        // Log.log("ApplicationWebSocket: [open new]");
         if (this.conn != null && this.conn.isOpen()) {
-            Log.log("ApplicationWebSocket: [has prev]");
-            this.conn.close(CLOSE_CODE, "UserInstance open new socket!");            
+            // Log.log("ApplicationWebSocket: [has prev]");
+            this.conn.close(SYNC_CLOSE_CODE, "UserInstance open new socket!");            
         }
         this.conn = conn;
     }
     
     protected final void processClose(int code, String message) {        
-        Log.log("ApplicationWebSocket: close [" + code + ":" + message + "]");
+        // Log.log("ApplicationWebSocket: close [" + code + ":" + message + "]");
     }
     
     final void sendMessage(String message) {
@@ -76,6 +77,12 @@ public abstract class ApplicationWebSocket {
     }
     
     final boolean isOpen() { 
-      return this.conn != null && this.conn.isOpen();
+        return this.conn != null && this.conn.isOpen();
+    }
+    
+    final void dispose() {
+        if (isOpen()) {
+          this.conn.close(DISPOSE_CLOSE_CODE, "Application instance is disposed !!!");
+        }
     }
 }
