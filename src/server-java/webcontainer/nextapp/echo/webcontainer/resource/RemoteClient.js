@@ -736,7 +736,6 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
         if (this._client.uiid) {
             _url += "/?uiid=" + this._client._uiid;
         }
-        console.log(_url);
         this._wsConnection = new Core.Web.WebSocketConnection(_url);
         this._eventsHandler = Core.method(this, this._onEvents);
     },

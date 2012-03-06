@@ -1472,7 +1472,6 @@ Core.Web.WebSocketConnection = Core.extend({
     * the <code>WebSocket</code>.
     */
     _processReceivedEvents: function(e) {
-        console.log("WSConnection: event " + e.type);
         this._listenerList.fireEvent({type: e.type, source: this, data: e});
     },
 	
@@ -1486,7 +1485,6 @@ Core.Web.WebSocketConnection = Core.extend({
             return;
         }
         
-        // console.log("Core.Web.WebSocketConnection: open");
         this._webSocket = new WebSocket(this._url, this._protocols);
         this._webSocket.onopen = this._eventsHandler;
         this._webSocket.onclose = this._eventsHandler;
@@ -1507,7 +1505,6 @@ Core.Web.WebSocketConnection = Core.extend({
         this._listenerList.removeAllListeners();        
         var state = this.getState();
         if (state == Core.Web.WebSocketConnection.STATE_CONNECTING || state == Core.Web.WebSocketConnection.STATE_OPEN) {
-            // console.log("Core.Web.WebSocketConnection: close");
             this._webSocket.close();
         }        
         this._webSocket = null;        
