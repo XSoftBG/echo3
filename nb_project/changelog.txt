@@ -1,0 +1,28 @@
+// (Ivan:) Трябва да се погледне дали описаните неща са в правилния проект. Мисля, че има и други неща, но са в историята ми в psi.
+// ще ги добавя в Понеделник.
+
+echo3
+
+Added background fading to modal windows
+Fixed modal windows - now able to show modal window from another modal window
+Component width and height now can be set in percentage
+
+Fixed issue with property updates - sometimes updates were lost after setting property // secure updates?
+Added new async monitor based on websockets
+Added property 'box-shadow' to all components
+Components stores their previous ID when moved to another parent
+
+Other minor updates
+
+echo3extras и echopoint
+
+Added new component - Autolookup selectfield
+Added new component - ckeditor
+Fixed bugs in RegexField
+Added ValidationListener in RegexField
+Added different download modes to DownloadService
+Added RestartApp service
+
+Updates in FlexiTable - now able to contain other components
+
+Other minor updates
