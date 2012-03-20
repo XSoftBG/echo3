@@ -1,6 +1,3 @@
-// (Ivan:) Трябва да се погледне дали описаните неща са в правилния проект. Мисля, че има и други неща, но са в историята ми в psi.
-// ще ги добавя в Понеделник.
-
 echo3
 
 Added background fading to modal windows
@@ -11,6 +8,12 @@ Fixed issue with property updates - sometimes updates were lost after setting pr
 Added new async monitor based on websockets
 Added property 'box-shadow' to all components
 Components stores their previous ID when moved to another parent
+
+Updates in TextComponents:
+ - trim
+ - upper case
+ - lower case
+ - auto select content
 
 Other minor updates
 
@@ -24,5 +27,10 @@ Added different download modes to DownloadService
 Added RestartApp service
 
 Updates in FlexiTable - now able to contain other components
+
+Updates in ContextMenu - added setMenuVisible
+Updates in Tree:
+ - node deleting wasn't working
+ - making nodes visible / invisible wasn't working 
 
 Other minor updates
