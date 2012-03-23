@@ -732,10 +732,18 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
      */
     $construct: function(client) {
         Echo.RemoteClient.AbstractAsyncManager.call(this, client);
-        var _url = document.location.toString().replace('http://', 'ws://').replace('https://', 'wss://') + "ws";
-        if (this._client.uiid) {
+        
+        var _url = document.location.toString();
+        var idx = _url.indexOf("?");
+        
+        if(idx > -1)
+          _url = _url.substr(0, idx);
+        
+        _url = _url.replace('http://', 'ws://').replace('https://', 'wss://') + "ws";        
+        
+        if (this._client.uiid)
             _url += "/?uiid=" + this._client._uiid;
-        }
+        
         this._wsConnection = new Core.Web.WebSocketConnection(_url);
         this._eventsHandler = Core.method(this, this._onEvents);
     },
