@@ -255,10 +255,10 @@ Core.Web.DOM = {
      */
     getEventOffset: function(e) {
         if (typeof e.offsetX == "number") {
-            return { x: e.offsetX, y: e.offsetY };
+            return {x: e.offsetX, y: e.offsetY};
         } else {
             var bounds = new Core.Web.Measure.Bounds(this.getEventTarget(e));
-            return { x: e.clientX - bounds.left, y: e.clientY - bounds.top };
+            return {x: e.clientX - bounds.left, y: e.clientY - bounds.top};
         }
     },
     
@@ -2301,14 +2301,14 @@ Core.Web.Measure = {
         }
         var dpi = horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch;
         switch (units) {
-        case "%":  return null;
-        case "in": return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch);
-        case "cm": return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 2.54;
-        case "mm": return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 25.4;
-        case "pt": return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 72;
-        case "pc": return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 6;
-        case "em": return value * (horizontal ? Core.Web.Measure._hEm   : Core.Web.Measure._vEm);
-        case "ex": return value * (horizontal ? Core.Web.Measure._hEx   : Core.Web.Measure._vEx);
+        case "%":return null;
+        case "in":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch);
+        case "cm":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 2.54;
+        case "mm":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 25.4;
+        case "pt":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 72;
+        case "pc":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch) / 6;
+        case "em":return value * (horizontal ? Core.Web.Measure._hEm   : Core.Web.Measure._vEm);
+        case "ex":return value * (horizontal ? Core.Web.Measure._hEx   : Core.Web.Measure._vEx);
         }
     },
 
@@ -2369,15 +2369,12 @@ Core.Web.Measure = {
      * @type Object
      */
     _getScrollOffset: function(element) {
-        var valueT = 0, valueL = 0;
+        var valueT = element.scrollTop  || 0, valueL = element.scrollLeft || 0;
         do {
-            if (element.scrollLeft || element.scrollTop) {
-                valueT += element.scrollTop  || 0;
-                valueL += element.scrollLeft || 0; 
-            }
-            element = element.offsetParent;
-        } while (element);
-        return { left: valueL, top: valueT };
+            valueT += element.scrollTop  || 0;
+            valueL += element.scrollLeft || 0;
+        } while ((element = element.offsetParent));
+        return {left: valueL, top: valueT};
     },
     
     /**
@@ -2388,13 +2385,12 @@ Core.Web.Measure = {
      * @type Object
      */
     _getCumulativeOffset: function(element) {
-        var valueT = 0, 
-            valueL = 0,
-            init = true;
-        do {
+        var valueT = element.offsetTop  || 0;
+        var valueL = element.offsetLeft || 0;
+        while((element = element.offsetParent)) {
             valueT += element.offsetTop  || 0;
             valueL += element.offsetLeft || 0;
-            if (!init && Core.Web.Env.MEASURE_OFFSET_EXCLUDES_BORDER) {
+            if (Core.Web.Env.MEASURE_OFFSET_EXCLUDES_BORDER) {
                 if (element.style.borderLeftWidth && element.style.borderLeftStyle != "none") {
                     var borderLeft = Core.Web.Measure.extentToPixels(element.style.borderLeftWidth, true);
                     valueL += borderLeft;
@@ -2410,10 +2406,8 @@ Core.Web.Measure = {
                     }
                 }
             }
-            init = false;
-            element = element.offsetParent;
-        } while (element);
-        return { left: valueL, top: valueT };
+        }
+        return {left: valueL, top: valueT};
     },
 
     /**
@@ -2441,7 +2435,9 @@ Core.Web.Measure = {
                 this._offscreenDiv.style.cssText = 
                         "position: absolute; top: -1300px; left: -1700px; width: 1600px; height: 1200px;";
                 document.body.appendChild(this._offscreenDiv);
-            }
+            },
+            
+            _isResized: false
         },
 
         /**
@@ -2467,7 +2463,7 @@ Core.Web.Measure = {
          * @type Integer
          */
         left: null,
-
+        
         /**
          * Creates a new Bounds object to calculate the size and/or position of an element.
          * 
@@ -2487,30 +2483,14 @@ Core.Web.Measure = {
                     height: window.innerHeight || document.documentElement.clientHeight,
                     width: window.innerWidth || document.documentElement.clientWidth
                 };
-            }
+            }            
             
-            var testElement = element;
-            while (testElement && testElement != document) {
-                testElement = testElement.parentNode;
-            }
-            var rendered = testElement == document;
-            
-            var parentNode, nextSibling;
+            var rendered = document.body.contains(element);
+            var tester = element;
             
             if (flags & Core.Web.Measure.Bounds.FLAG_MEASURE_DIMENSION) {
                 if (!rendered) {
-                    // Element must be added to off-screen element for measuring.
-                    
-                    // Store parent node and next sibling such that element may be replaced into proper position
-                    // once off-screen measurement has been completed.
-                    parentNode = element.parentNode;
-                    nextSibling = element.nextSibling;
-            
-                    // Remove element from parent.
-                    if (parentNode) {
-                        parentNode.removeChild(element);
-                    }
-                    
+                    // Element must be added to off-screen element for measuring.                    
                     if (constraints) {
                         if (constraints.width) {
                             Core.Web.Measure.Bounds._offscreenDiv.width = constraints.width;
@@ -2518,34 +2498,33 @@ Core.Web.Measure = {
                         if (constraints.height) {
                             Core.Web.Measure.Bounds._offscreenDiv.height = constraints.height;
                         }
+                        Core.Web.Measure.Bounds._isResized = true;
+                    } else if (Core.Web.Measure.Bounds._isResized) {
+                        Core.Web.Measure.Bounds._offscreenDiv.width = "1600px";
+                        Core.Web.Measure.Bounds._offscreenDiv.height = "1200px";
+                        Core.Web.Measure.Bounds._isResized = false;
                     }
                     
                     // Append element to measuring container DIV.
-                    Core.Web.Measure.Bounds._offscreenDiv.appendChild(element);
-                    
-                    if (constraints) {
-                        Core.Web.Measure.Bounds._offscreenDiv.width = "1600px";
-                        Core.Web.Measure.Bounds._offscreenDiv.height = "1200px";
-                    }
+                    tester = element.cloneNode(true);
+                    Core.Web.Measure.Bounds._offscreenDiv.appendChild(tester);
                 }
                 
                 // Store width and height of element.
-                this.width = element.offsetWidth;
-                this.height = element.offsetHeight;
+                this.width = tester.offsetWidth;
+                this.height = tester.offsetHeight;
                 
                 if (!rendered) {
-                    // Replace off-screen measured element in previous location.
-                    Core.Web.Measure.Bounds._offscreenDiv.removeChild(element);
-                    if (parentNode) {
-                        parentNode.insertBefore(element, nextSibling);
-                    }
+                    // Element must be removed from off-screen element for measuring.
+                    Core.Web.Measure.Bounds._offscreenDiv.removeChild(tester);
+                    tester = element;
                 }
             }
 
             // Determine top and left positions of element if rendered on-screen.
             if (rendered && (flags & Core.Web.Measure.Bounds.FLAG_MEASURE_POSITION)) {
-                var cumulativeOffset = Core.Web.Measure._getCumulativeOffset(element);
-                var scrollOffset = Core.Web.Measure._getScrollOffset(element);
+                var cumulativeOffset = Core.Web.Measure._getCumulativeOffset(tester);
+                var scrollOffset = Core.Web.Measure._getScrollOffset(tester);
         
                 this.top = cumulativeOffset.top - scrollOffset.top;
                 this.left = cumulativeOffset.left - scrollOffset.left;
