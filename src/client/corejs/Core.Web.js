@@ -2299,7 +2299,7 @@ Core.Web.Measure = {
         if (!units || units == "px") {
             return value;
         }
-        var dpi = horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch;
+        // var dpi = horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch;
         switch (units) {
         case "%":return null;
         case "in":return value * (horizontal ? Core.Web.Measure._hInch : Core.Web.Measure._vInch);
