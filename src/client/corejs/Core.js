@@ -520,6 +520,43 @@ Core.Arrays = {
     },
     
     /**
+     * Returns duplicate items from two arrays.
+     * 
+     * @param {Array} array1 the array to be analyzed
+     * @param {Array} array2 an array whose elements may be present in <code>array1</code>
+     * @return array with elements that are contained in arrays.
+     * @type array
+     */
+    getDuplicates: function(array1, array2) {
+       var result = [];
+       for (var i = 0; i < array1.length; ++i) {
+           if (Core.Arrays.indexOf(array2, array1[i]) != -1) {
+               result.push(array1[i]);
+           }
+       }
+       return result;
+    },
+    
+    /*
+     * Returns unique itmes from two arrays.
+     */
+    getUniques: function(array1, array2) {
+        var result = [];
+        var i;
+        for (i = 0; i < array1.length; ++i) {
+           if (Core.Arrays.indexOf(array2, array1[i]) == -1) {
+               result.push(array1[i]);
+           }
+        }
+        for (i = 0; i < array2.length; ++i) {
+           if (Core.Arrays.indexOf(array1, array2[i]) == -1) {
+               result.push(array2[i]);
+           }
+        }
+       return result;
+    },
+    
+    /**
      * Removes the first instance of the specified item from an array.
      * If the item does not exist in the array, no action is taken.
      * Equality is determined using the '==' operator.
