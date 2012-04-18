@@ -31,7 +31,6 @@ package nextapp.echo.webcontainer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,8 +39,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
@@ -121,7 +118,7 @@ public class UserInstance implements Serializable {
          */
         public void propertyChange(PropertyChangeEvent e) {
             String propertyName = e.getPropertyName();
-            if (ApplicationInstance.LAST_ENQUEUE_TASK_PROPERTY.equals(propertyName)) {
+            if (ApplicationInstance.LAST_ENQUEUE_TASK_PROPERTY.equals(propertyName)) {                
                 if (applicationWebSocket != null && applicationWebSocket.isOpen()) {
                     UserInstance.this.applicationWebSocket.sendMessage(AsyncMonitorService.REQUEST_SYNC_ATTR);
                 }
@@ -468,8 +465,8 @@ public class UserInstance implements Serializable {
             try {
                 ApplicationInstance.setActive(applicationInstance);
                 applicationInstance.removePropertyChangeListener(applicationPropertyChangeListener);
-                applicationInstance.dispose();
                 applicationWebSocket.dispose();
+                applicationInstance.dispose();
             } finally {
                 ApplicationInstance.setActive(null);
             }

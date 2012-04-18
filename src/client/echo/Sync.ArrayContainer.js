@@ -293,22 +293,24 @@ Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
         
         this.renderAddChildren(update);
 
-				var height = this.component.render("height", "auto");
-				var width = this.component.render("width", "auto");
-        if(parentElement.tagName.toLowerCase() == "td") // we should not set width to table cells!
-        {
-					this.element.style.height = height;
-					this.element.style.width = width;
+        var height = this.component.render("height", "auto");
+        var width = this.component.render("width", "auto");
+        
+        // we should not set width to table cells!
+        if (parentElement.tagName.toLowerCase() == "td") {
+            this.element.style.height = height;
+            this.element.style.width = width;
+        } else {
+            if(height != "auto") {
+                this.element.style.height = "100%";
+            }
+            if(width != "auto") {
+                this.element.style.width = "100%";
+            }
+            parentElement.style.height = height;
+            parentElement.style.width = width;
         }
-        else
-        {
-          if(height != "auto")
-            this.element.style.height = "100%";
-          if(width != "auto")
-            this.element.style.width = "100%";
-          parentElement.style.height= height;
-          parentElement.style.width= width;
-        }
+        
         parentElement.appendChild(this.element);
     },
     
@@ -321,7 +323,11 @@ Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
             Echo.Sync.Insets.render(layoutData.insets, cellElement, "padding");
             Echo.Sync.Alignment.render(layoutData.alignment, cellElement, true, this.component);
             if (layoutData.height) {
-                cellElement.style.height = Echo.Sync.Extent.toPixels(layoutData.height, false) + "px";
+                if (Echo.Sync.Extent.isPercent(layoutData.height)) {
+                    cellElement.style.height = layoutData.height;
+                } else {
+                    cellElement.style.height = Echo.Sync.Extent.toPixels(layoutData.height, false) + "px";
+                }
             }
         }
     }

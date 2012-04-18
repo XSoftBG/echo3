@@ -203,6 +203,12 @@ implements Serializable {
      * @see #generateId()
      */
     private long nextId;
+            
+    /**
+     * Flag indicating whether the application has been disposed, i.e., whether <code>ApplicationInstance.dispose()</code>
+     * has been invoked.
+     */
+    private Boolean disposed = false;
     
     /** 
      * Creates an <code>ApplicationInstance</code>. 
@@ -264,12 +270,22 @@ implements Serializable {
      * Implementations must invoke <code>super.dispose()</code>.
      */
     public void dispose() {
-        if (defaultWindow != null) {
-            defaultWindow.doDispose();
-            defaultWindow.register(null);
+        if (disposed) {
+            throw new IllegalStateException("Attempt to invoke ApplicationInstance.dispose() on disposed instance.");
+        }        
+        try {
+          if (defaultWindow != null) {
+              defaultWindow.doDispose();
+              defaultWindow.register(null);
+          }
+          synchronized (taskQueueMap) {
+              taskQueueMap.clear();
+          }
         }
-        synchronized (taskQueueMap) {
-            taskQueueMap.clear();
+        finally {
+          synchronized(disposed) {
+              disposed = true;
+          }          
         }
     }
 
@@ -657,7 +673,7 @@ implements Serializable {
             }
         }
         Iterator it = currentTasks.iterator();
-        while (it.hasNext()) {
+        while (it.hasNext() && !disposed) {
             ((Runnable) it.next()).run();
         }
     }

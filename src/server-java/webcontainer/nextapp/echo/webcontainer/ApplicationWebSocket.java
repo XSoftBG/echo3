@@ -51,18 +51,14 @@ public abstract class ApplicationWebSocket {
     
     private Connection conn = null;
     
-    protected final void processOpen(ApplicationWebSocket.Connection conn) {
-        // Log.log("ApplicationWebSocket: [open new]");
+    protected final void processOpen(ApplicationWebSocket.Connection conn) {        
         if (this.conn != null && this.conn.isOpen()) {
-            // Log.log("ApplicationWebSocket: [has prev]");
             this.conn.close(SYNC_CLOSE_CODE, "UserInstance open new socket!");            
         }
         this.conn = conn;
     }
     
-    protected final void processClose(int code, String message) {        
-        // Log.log("ApplicationWebSocket: close [" + code + ":" + message + "]");
-    }
+    protected final void processClose(int code, String message) { }
     
     final void sendMessage(String message) {
         try {

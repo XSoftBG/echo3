@@ -63,6 +63,12 @@ implements Service {
     /** The XHTML 1.0 Transitional System ID. */
     public static final String XHTML_1_0_TRANSITIONAL_SYSTEM_ID = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
     
+    /** The HTML 4.01 Transitional Public ID. */
+    public static final String HTML_4_01_TRANSITIONAL_PUBLIC_ID = "-//W3C//DTD HTML 4.01 Transitional//EN";
+    
+    /** The HTML 4 Strict system ID. */
+    public static final String HTML_4_STRICT_SYSTEM_ID = "http://www.w3.org/TR/html4/strict.dtd";
+    
     /** The XHTML 1.0 Namespace URI. */
     public static final String XHTML_1_0_NAMESPACE_URI = "http://www.w3.org/1999/xhtml";
     
@@ -74,14 +80,11 @@ implements Service {
      */
     private static final Properties OUTPUT_PROPERTIES = new Properties();
     static {
-        // The XML declaration is omitted as Internet Explorer 6 will operate in quirks mode if it is present.
         OUTPUT_PROPERTIES.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         OUTPUT_PROPERTIES.putAll(DomUtil.OUTPUT_PROPERTIES_INDENT);
-        OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_PUBLIC, XHTML_1_0_TRANSITIONAL_PUBLIC_ID);
-        OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_SYSTEM, XHTML_1_0_TRANSITIONAL_SYSTEM_ID);
     }
-    
-    private static final Pattern USER_AGENT_MSIE8 = Pattern.compile("MSIE 8\\.");
+        
+    private static final Pattern USER_AGENT_MSIE = Pattern.compile("MSIE");
 
     /** Singleton instance. */
     public static final WindowHtmlService INSTANCE = new WindowHtmlService();
@@ -95,10 +98,21 @@ implements Service {
      */
     private Document createHtmlDocument(Connection conn, boolean debug) {
         UserInstanceContainer userInstanceContainer = conn.getUserInstanceContainer();
-        String userAgent = conn.getRequest().getHeader("User-Agent");
-        Document document = DomUtil.createDocument("html", XHTML_1_0_TRANSITIONAL_PUBLIC_ID, 
-                XHTML_1_0_TRANSITIONAL_SYSTEM_ID, XHTML_1_0_NAMESPACE_URI);
-        
+                
+        final String userAgent = conn.getRequest().getHeader("User-Agent");
+        final boolean IEBrowser = USER_AGENT_MSIE.matcher(userAgent).find();
+        final Document document;
+                
+        if (userAgent != null && IEBrowser) {
+            document = DomUtil.createDocument("html", HTML_4_01_TRANSITIONAL_PUBLIC_ID, HTML_4_STRICT_SYSTEM_ID, XHTML_1_0_NAMESPACE_URI);            
+            OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_PUBLIC, HTML_4_01_TRANSITIONAL_PUBLIC_ID);
+            OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_SYSTEM, HTML_4_STRICT_SYSTEM_ID);
+        } else {
+            document = DomUtil.createDocument("html", XHTML_1_0_TRANSITIONAL_PUBLIC_ID, XHTML_1_0_TRANSITIONAL_SYSTEM_ID, XHTML_1_0_NAMESPACE_URI);
+            OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_PUBLIC, XHTML_1_0_TRANSITIONAL_PUBLIC_ID);
+            OUTPUT_PROPERTIES.setProperty(OutputKeys.DOCTYPE_SYSTEM, XHTML_1_0_TRANSITIONAL_SYSTEM_ID);
+        }
+                
         Element htmlElement = document.getDocumentElement();
 
         Element headElement = document.createElement("head");
@@ -109,11 +123,11 @@ implements Service {
         metaGeneratorElement.setAttribute("content", ApplicationInstance.ID_STRING);
         headElement.appendChild(metaGeneratorElement);
 
-        if (userAgent != null && USER_AGENT_MSIE8.matcher(userAgent).find()) {
-            // Force Internet Explorer 8 standards-compliant mode.
+        if (userAgent != null && IEBrowser) {            
             Element metaCompElement = document.createElement("meta");
             metaCompElement.setAttribute("http-equiv", "X-UA-Compatible");
-            metaCompElement.setAttribute("content", "IE=8");
+            final String tmpStr = userAgent.substring(userAgent.indexOf("MSIE"), userAgent.length());
+            metaCompElement.setAttribute("content", "IE=" + tmpStr.substring(5, tmpStr.indexOf(";")));
             headElement.appendChild(metaCompElement);
         }
 
