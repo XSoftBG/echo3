@@ -17,7 +17,7 @@ Updates in TextComponents:
 
 Other minor updates
 
-echo3extras и echopoint
+echo3extras и echopoint и echolot
 
 Added new component - Autolookup selectfield
 Added new component - ckeditor
@@ -25,6 +25,8 @@ Fixed bugs in RegexField
 Added ValidationListener in RegexField
 Added different download modes to DownloadService
 Added RestartApp service
+Added new component - gallery
+Fixed CloseApp for Google Chrome
 
 Updates in FlexiTable - now able to contain other components
 
