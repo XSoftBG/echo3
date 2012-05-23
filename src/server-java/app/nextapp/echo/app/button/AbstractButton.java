@@ -43,6 +43,7 @@ import nextapp.echo.app.ImageReference;
 import nextapp.echo.app.Insets;
 import nextapp.echo.app.event.ActionEvent;
 import nextapp.echo.app.event.ActionListener;
+import nextapp.echo.app.event.EventListenerList;
 
 /**
  * An abstract base class for button components.  Provides basic properties, a
@@ -117,6 +118,22 @@ public abstract class AbstractButton extends Component {
         }
     };
     
+    /**
+     * Set (replace) all <code>ActionListeners</code> wich were added by @see nextapp.echo.app.button.Button#addActionListener(ActionListener).
+     * 
+     * @param l the listener to add
+     */
+    public void setActionListener(ActionListener l) {
+        if (hasEventListenerList()) {
+          EventListenerList ell = getEventListenerList();
+          EventListener[] listeners = ell.getListeners(ActionListener.class);
+          for (int index = 0; index < listeners.length; ++index) {
+              ell.removeListener( ActionListener.class, (ActionListener) listeners[index] );
+          }
+        }
+        addActionListener(l);
+    }
+
     /**
      * Adds an <code>ActionListener</code> to receive notification of user
      * actions, i.e., button presses.
