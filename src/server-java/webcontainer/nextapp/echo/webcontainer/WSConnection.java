@@ -77,25 +77,33 @@ public class WSConnection extends AbstractConnection {
       return applicationWebSocket;
     }
     
-    void init(UserInstanceContainer userInstanceContainer, ApplicationWebSocket applicationWebSocket) {        
+    public void preInit(UserInstanceContainer userInstanceContainer) {
         this.userInstanceContainer = userInstanceContainer;
         this.userInstance = userInstanceContainer.getUserInstanceById(uiid);
-        this.applicationWebSocket = applicationWebSocket;
         
-        HttpSession session = request.getSession();
-        session.setAttribute(getUserInstanceContainerSessionKey(this.servlet), userInstanceContainer);
-        session.setAttribute(getWebSocketSessionKey(this.servlet), applicationWebSocket);
+        final HttpSession session = request.getSession();
+        session.setAttribute(getUserInstanceContainerSessionKey(this.servlet), userInstanceContainer);        
+    }
+    
+    public void postInit(ApplicationWebSocket appws) {
+        if (this.userInstanceContainer == null) {
+            throw new Error("WSConnection is not preinitialized!");
+        }
+        
+        this.applicationWebSocket = appws;
+        final HttpSession session = request.getSession();
+        session.setAttribute(getWebSocketSessionKey(this.servlet), this.applicationWebSocket);
         
         this.userInstance.initWS(this);
     }
     
     /**
      * Determines if the <code>WSConnection</code> has been initialized, 
-     * i.e., whether its <code>init()</code> method has been invoked.
+     * i.e., whether its <code>preInit()</code> && <code>postInit()</code> methods has been invoked.
      * 
      * @return true if the <code>WSConnection</code> is initialized
      */
-    public boolean isInitialized() {
-        return this.userInstance != null;
+    public boolean isReady() {
+        return this.userInstanceContainer != null && this.userInstance != null;
     }
 }

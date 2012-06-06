@@ -34,6 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import nextapp.echo.app.ApplicationInstance;
 import nextapp.echo.app.util.Log;
 import nextapp.echo.app.util.Uid;
 
@@ -75,14 +76,17 @@ public abstract class WebSocketConnectionHandler {
         try {
             conn = new WSConnection(servlet, request, protocol);
             // Log.log("WSCH: process!");
-            if (!conn.isInitialized()) {
+            if (!conn.isReady()) {
                 // Log.log("WSCH: process [new web socket]!");
-                HttpSession session = request.getSession();
+                final HttpSession session = request.getSession();
                 if (session == null) {
                     throw new RuntimeException("WebSocketConnectionHandler: initialization of WSConnection is impossible without session!");
                 }
-                UserInstanceContainer userInstanceContainer = (UserInstanceContainer) session.getAttribute(AbstractConnection.getUserInstanceContainerSessionKey(this.parent));
-                conn.init(userInstanceContainer, newApplicationWebSocket());
+                final String key = AbstractConnection.getUserInstanceContainerSessionKey(this.parent);
+                final UserInstanceContainer userInstanceContainer = (UserInstanceContainer) session.getAttribute(key);
+                
+                conn.preInit(userInstanceContainer);
+                conn.postInit(newApplicationWebSocket(conn.getUserInstance().getApplicationInstance()));
             }
             
         }
@@ -110,5 +114,5 @@ public abstract class WebSocketConnectionHandler {
         throw new RuntimeException(ex);
     }
     
-    public abstract ApplicationWebSocket newApplicationWebSocket();
+    public abstract ApplicationWebSocket newApplicationWebSocket(ApplicationInstance applicationInstance);
 }
