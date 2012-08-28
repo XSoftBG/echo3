@@ -463,10 +463,10 @@ public class UserInstance implements Serializable {
     public void dispose() {
         if (applicationInstance != null) {
             try {
-                ApplicationInstance.setActive(applicationInstance);
-                applicationInstance.removePropertyChangeListener(applicationPropertyChangeListener);
-                applicationWebSocket.dispose();
+                ApplicationInstance.setActive(applicationInstance);                                
                 applicationInstance.dispose();
+                applicationWebSocket.dispose();
+                applicationInstance.removePropertyChangeListener(applicationPropertyChangeListener);
             } finally {
                 ApplicationInstance.setActive(null);
             }
