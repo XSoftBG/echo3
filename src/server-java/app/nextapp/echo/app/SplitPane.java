@@ -337,7 +337,7 @@ implements Pane, PaneContainer {
      * @return true if the <code>SplitPane</code> should provide
      *         a visible separator.
      */
-    public boolean isSeparatorVisible(boolean newValue) {
+    public boolean isSeparatorVisible() {
         Boolean value = (Boolean) get(PROPERTY_SEPARATOR_VISIBLE);
         return value == null ? true : value.booleanValue();
     }
