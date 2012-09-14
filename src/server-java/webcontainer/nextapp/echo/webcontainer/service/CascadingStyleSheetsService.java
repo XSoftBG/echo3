@@ -26,56 +26,52 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  */
-
 package nextapp.echo.webcontainer.service;
-
 
 import nextapp.echo.webcontainer.ContentType;
 import nextapp.echo.webcontainer.util.Resource;
 
 /**
- * A service which renders <code>JavaScript</code> resource files.
+ * A service which renders <code>CSS</code> resource files.
+ * 
+ * @author sieskei (XSoft Ltd.)
  */
-public class JavaScriptService extends DefaultStringVersionService {
+public class CascadingStyleSheetsService extends DefaultStringVersionService {
     
     /**
-     * Creates a new <code>JavaScript</code> service from the specified
-     * resource in the <code>CLASSPATH</code>.
+     * Creates a new <code>CascadingStyleSheetsService</code> based on the content in
+     * the specified <code>CLASSPATH</code> resource. A runtime exception will
+     * be thrown in the event the resource does not exist (it generally should
+     * not be caught).
      * 
-     * @param id the <code>Service</code> id
-     * @param resourceName the <code>CLASSPATH</code> resource name containing
-     *        the JavaScript content
-     * @return the created <code>JavaScriptService</code>
-     */
-    public static JavaScriptService forResource(String id, String resourceName) {
+     * Please Note that all urls in the StyleSheet must be relative to the
+     * Servlet location when this method is used.
+     * 
+     * @param id the <code>Service</code> identifier
+     * @param resourceName the path to the content resource in the <code>CLASSPATH</code>
+     * @return the created <code>CascadingStyleSheetsService</code>
+     */  
+    public static CascadingStyleSheetsService forResource(String id, String resourceName) {
         String content = Resource.getResourceAsString(resourceName);
-        return new JavaScriptService(id, content);
+        return new CascadingStyleSheetsService(id, content);
     }
     
-    public static JavaScriptService forResources(String id, String[] resourceNames) {
-        StringBuffer out = new StringBuffer();
-        for (int i = 0; i < resourceNames.length; ++i) {
-            out.append(Resource.getResourceAsString(resourceNames[i]));
-            out.append("\n\n");
-        }
-        return new JavaScriptService(id, out.toString());
-    }
-
     /**
-     * Creates a new <code>JavaScriptService</code>.
+     * Creates a new <code>CascadingStyleSheetsService</code>.
      * 
      * @param id the <code>Service</code> id
-     * @param content the <code>JavaScript content</code>
+     * @param content the <code>CSS content</code>
      */
-    public JavaScriptService(String id, String content) {
+    public CascadingStyleSheetsService(String id, String content) {
         super(id, content);
     }
+  
 
     /**
      * @see DefaultStringVersionService#getContnentType()
      */
     @Override
     ContentType getContnentType() {
-        return ContentType.TEXT_JAVASCRIPT;
+        return ContentType.TEXT_CSS;
     }
 }
