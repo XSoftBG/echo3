@@ -51,29 +51,30 @@ public abstract class ApplicationWebSocket {
     
     private Connection conn = null;
     
-    protected final void processOpen(ApplicationWebSocket.Connection conn) {        
-        if (this.conn != null && this.conn.isOpen()) {
-            this.conn.close(SYNC_CLOSE_CODE, "UserInstance open new socket!");            
+    protected final void processOpen(ApplicationWebSocket.Connection connection) {        
+        if (conn != null && conn.isOpen()) {
+            conn.close(SYNC_CLOSE_CODE, "UserInstance open new socket!");            
         }
-        this.conn = conn;
+        conn = connection;
     }
     
-    protected final void processClose(int code, String message) { }
+    protected final void processClose(int code, String message) {
+        conn = null;
+    }
     
     final void sendMessage(String message) {
         try {
-            this.conn.sendMessage(message);
+            conn.sendMessage(message);
         }
         catch (IOException ex) {
-            String exceptionId = Uid.generateUidString();
-            Log.log("Server Exception. ID: " + exceptionId, ex);
-            this.conn.close(-1, "fatal");
+            Log.log("Server Exception. ID: " + Uid.generateUidString(), ex);
+            conn.close(-1, "fatal");
             throw new RuntimeException(ex);
         }
     }
     
-    final boolean isOpen() { 
-        return this.conn != null && this.conn.isOpen();
+    final boolean isOpen() {
+        return conn != null && conn.isOpen();
     }
     
     final void dispose() {

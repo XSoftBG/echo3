@@ -5,13 +5,7 @@
 Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
 
     $abstract: {
-
-        /**
-         * The DOM element name of child container cells.
-         * @type String
-         */
-        cellElementNodeName: null,
-        
+      
         /** 
          * Abstract method which renders layout data on child cell element.
          * 
@@ -22,6 +16,12 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
     },
     
     $virtual: {
+      
+        /**
+         * The prototype of child DOM element to be cloned when rendering.
+         * @type Element 
+         */
+        childPrototype: null,
         
         /** 
          * The key code which should move focus to the previous child cell. 
@@ -121,8 +121,8 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
      * @param {Echo.Component} the child component
      * @param {Number} index the index of the child within the parent 
      */
-    _renderAddChild: function(update, child, index) {
-        var cellElement = document.createElement(this.cellElementNodeName);
+    _renderAddChild: function(update, child, index) {      
+        var cellElement = this.childPrototype.cloneNode(false);
         this._childIdToElementMap[child.renderId] = cellElement;
         Echo.Render.renderComponentAdd(update, child, cellElement);
 
@@ -253,12 +253,46 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
  */
 Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
 
-    $load: function() {
-        Echo.Render.registerPeer("Column", this);
+    $static: {
+    
+        /** 
+         * Creates a prototype DOM element hierarchy to be cloned when rendering.   
+         * 
+         * @return the prototype Element
+         * @type Element
+         */
+        _createColumnPrototype: function() {
+            var div = document.createElement("div");
+            div.style.outlineStyle = "none";
+            div.tabIndex = "-1";
+            return div;
+        },
+        
+        /** 
+         * Creates a prototype of row child DOM element to be cloned when rendering.
+         * 
+         * @return the prototype Element
+         * @type Element
+         */
+         _createChildPrototype: function() {
+            return document.createElement("div");
+         },
+        
+        /** 
+         * The prototype DOM element hierarchy to be cloned when rendering.
+         * @type Element 
+         */
+        _columnPrototype: null
     },
 
-    /** @see Echo.Render.ComponentSync#cellElementNodeName */
-    cellElementNodeName: "div",
+
+    $load: function() {
+        this._columnPrototype = this._createColumnPrototype();
+        Echo.Render.registerPeer("Column", this);
+    },
+        
+    /** @see Echo.Sync.ArrayContainer#childPrototype */
+    childPrototype: null,
     
     /** @see Echo.Sync.ArrayContainer#prevFocusKey */
     prevFocusKey: 38,
@@ -272,27 +306,20 @@ Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
     /** @see Echo.Sync.ArrayContainer#nextFocusFlag */
     nextFocusFlag: Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_DOWN,
     
+    /** Default Column layout constructor */
+    $construct: function() {
+        this.childPrototype = Echo.Sync.Column._createChildPrototype();
+    },
+    
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
-        this.element = this.containerElement = document.createElement("div");
+        this.element = this.containerElement = Echo.Sync.Column._columnPrototype.cloneNode(true);
         this.element.id = this.component.renderId;
-        this.element.style.outlineStyle = "none";
-        this.element.tabIndex = "-1";
     
         Echo.Sync.renderComponentDefaults(this.component, this.element);
         Echo.Sync.Border.render(this.component.render("border"), this.element);
         Echo.Sync.Insets.render(this.component.render("insets"), this.element, "padding");
     
-        this.cellSpacing = Echo.Sync.Extent.toPixels(this.component.render("cellSpacing"), false);
-        if (this.cellSpacing) {
-            this.spacingPrototype = document.createElement("div");
-            this.spacingPrototype.style.height = this.cellSpacing + "px";
-            this.spacingPrototype.style.fontSize = "1px";
-            this.spacingPrototype.style.lineHeight = "0";
-        }
-        
-        this.renderAddChildren(update);
-
         var height = this.component.render("height", "auto");
         var width = this.component.render("width", "auto");
         
@@ -311,9 +338,19 @@ Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
             parentElement.style.width = width;
         }
         
+        this.cellSpacing = Echo.Sync.Extent.toPixels(this.component.render("cellSpacing"), false);
+        if (this.cellSpacing) {
+            this.spacingPrototype = document.createElement("div");
+            this.spacingPrototype.style.height = this.cellSpacing + "px";
+            this.spacingPrototype.style.fontSize = "1px";
+            this.spacingPrototype.style.lineHeight = "0";
+        }
+        
+        this.renderAddChildren(update);
+        
         parentElement.appendChild(this.element);
     },
-    
+        
     /** @see Echo.Sync.ArrayContainer#renderChildLayoutData */
     renderChildLayoutData: function(child, cellElement) {
         var layoutData = child.render("layoutData");
@@ -347,22 +384,36 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
          * @type Element
          */
         _createRowPrototype: function() {
-            var div = document.createElement("div");
-            div.style.outlineStyle = "none";
-						div.style.height = "100%";
-            div.tabIndex = "-1";
-        
-            var table = document.createElement("table");
-            table.style.borderCollapse = "collapse";
-            div.appendChild(table);
-        
-            var tbody = document.createElement("tbody");
-            table.appendChild(tbody);
+            var divTable = document.createElement("div");
+            divTable.style.display = "table";
+            divTable.style.width = "auto";
+            divTable.style.height = "auto";
+            divTable.style.outlineStyle = "none";
+            divTable.tabIndex = "-1";
+            divTable.style.borderCollapse = "collapse";
             
-            tbody.appendChild(document.createElement("tr"));
-        
-            return div;
+            var divRow = document.createElement("div");
+            divRow.style.width = "auto";
+            divRow.style.height = "auto";
+            divRow.style.display = "table-row";
+            
+            divTable.appendChild(divRow);
+            
+            return divTable;
         },
+        
+        /** 
+         * Creates a prototype of row child DOM element to be cloned when rendering.
+         * 
+         * @return the prototype Element
+         * @type Element
+         */
+         _createChildPrototype: function() {
+            var divCell = document.createElement("div");
+            divCell.style.display = "table-cell";
+            divCell.style.verticalAlign = "middle";
+            return divCell;
+         },
         
         /** 
          * The prototype DOM element hierarchy to be cloned when rendering.
@@ -376,8 +427,8 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
         Echo.Render.registerPeer("Row", this);
     },
 
-    /** @see Echo.Render.ComponentSync#cellElementNodeName */
-    cellElementNodeName: "td",
+    /** @see Echo.Render.ArrayContainer#childPrototype */
+    childPrototype: null,
 
     /** @see Echo.Sync.ArrayContainer#prevFocusKey */
     prevFocusKey: 37,
@@ -394,6 +445,11 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
     /** @see Echo.Sync.ArrayContainer#invertFocusRtl */
     invertFocusRtl: true,
     
+    /** Default Row layout constructor */
+    $construct: function() {
+        this.childPrototype = Echo.Sync.Row._createChildPrototype();
+    },
+    
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this.element = Echo.Sync.Row._rowPrototype.cloneNode(true);
@@ -404,54 +460,53 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
         Echo.Sync.Insets.render(this.component.render("insets"), this.element, "padding");
         Echo.Sync.Alignment.render(this.component.render("alignment"), this.element, true, this.component);
         
-        //                      div          table      tbody      tr
-        this.containerElement = this.element.firstChild.firstChild.firstChild;
-				// if the parent element has width / height, we should not override them!
-				var change_height = (!parentElement.style.height) || parentElement.style.height == '' || parentElement.style.height == 'auto'; 
-				var change_width = (!parentElement.style.width) || parentElement.style.width == '' || parentElement.style.width == 'auto';
-
-				var table = this.element.firstChild
-				var table_width = this.component.render("width", "auto");
-				var table_height = this.component.render("height", "auto");
-				var child_height = (table_height == "auto") ? table_height : "100%";
-				var child_width = (table_width == "auto") ? table_width : "100%";
-				table.style.width = change_width ? child_width : table_width;
-				table.style.height = change_height ? child_height : table_height;
-				table.style.borderCollapse = "collapse";
-		
-				var tbody = table.firstChild
-				tbody.style.width = child_width;
-				tbody.style.height = child_height;
-				
-				var tr = tbody.firstChild
-				tr.style.width = child_width;
-				tr.style.height = child_height;
-
+        //                      div (table)  div (table-row)
+        this.containerElement = this.element.firstChild;
+        
+        var width = this.component.render("width");
+        var height = this.component.render("height");
+        
+        var change_width  = (!parentElement.style.width)  || parentElement.style.width  == '' || parentElement.style.width  == 'auto';
+        var change_height = (!parentElement.style.height) || parentElement.style.height == '' || parentElement.style.height == 'auto'; 
+        
+        if (width && change_width) {
+            parentElement.style.height = width;
+            this.element.style.width = "100%";
+        } else if (width) {
+            this.element.style.width = width;
+            this.element.firstChild.style.width = "100%";
+        }
+        
+        if (height && change_height) {
+            parentElement.style.height = height;
+            this.element.style.height = "100%";
+        } else if (height) {
+            this.element.style.height = height;
+            this.element.firstChild.style.height = "100%";
+        }
+        
         this.cellSpacing = Echo.Sync.Extent.toPixels(this.component.render("cellSpacing"), false);
         if (this.cellSpacing) {
-            this.spacingPrototype = document.createElement("td");
+            this.spacingPrototype = document.createElement("div");
+            this.spacingPrototype.style.display = "table-cell";
             this.spacingPrototype.style.padding = 0;
             this.spacingPrototype.style.width = this.cellSpacing + "px";
+            this.spacingPrototype.style.height = "auto";
         }
         
         this.renderAddChildren(update);
-	
-				if(change_height) 
-					parentElement.style.height= table_height;
-				if(change_width) 
-					parentElement.style.width = table_width;
+                
         parentElement.appendChild(this.element);
     },
 
     /** @see Echo.Sync.ArrayContainer#renderChildLayoutData */
     renderChildLayoutData: function(child, cellElement) {
         var layoutData = child.render("layoutData");
-        var insets;
         if (layoutData) {
-            insets = layoutData.insets;
             Echo.Sync.Color.render(layoutData.background, cellElement, "backgroundColor");
             Echo.Sync.FillImage.render(layoutData.backgroundImage, cellElement);
-            Echo.Sync.Alignment.render(layoutData.alignment, cellElement, true, this.component);
+            Echo.Sync.Alignment.render(layoutData.alignment, cellElement, { horizontal: true, vertical: false }, this.component);
+            Echo.Sync.Insets.render(layoutData.insets, cellElement, "padding");
             if (layoutData.width) {
                 if (Echo.Sync.Extent.isPercent(layoutData.width)) {
                     cellElement.style.width = layoutData.width;
@@ -463,9 +518,5 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
                 }
             }
         }
-        if (!insets) {
-            insets = 0;
-        }
-        Echo.Sync.Insets.render(insets, cellElement, "padding");
     }
 });
