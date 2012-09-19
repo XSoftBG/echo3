@@ -728,23 +728,22 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
      * Creates a new asynchronous manager basedon Core.Web.WebSocketConnection.
      *
      * @param {Echo.RemoteClient} client the supported client
-     * @param {Integer} socket identity
      */
     $construct: function(client) {
         Echo.RemoteClient.AbstractAsyncManager.call(this, client);
+                
+        var loc = window.location;
+        var protocol = loc.protocol == "http:" ? "ws:" : loc.protocol == "https:" ? "wss:" : null;
+        if (!protocol) {
+            throw new Error("Echo.RemoteClient.WebSocketAsyncManager: unknown protocol!");
+        }
         
-        var _url = document.location.toString();
-        var idx = _url.indexOf("?");
+        var URL = protocol + "//" + loc.hostname + ":" + loc.port + loc.pathname + "ws";
+        if (this._client.uiid) {
+            URL += "?uiid=" + this._client._uiid;
+        }
         
-        if(idx > -1)
-          _url = _url.substr(0, idx);
-        
-        _url = _url.replace('http://', 'ws://').replace('https://', 'wss://') + "ws";        
-        
-        if (this._client.uiid)
-            _url += "/?uiid=" + this._client._uiid;
-        
-        this._wsConnection = new Core.Web.WebSocketConnection(_url);
+        this._wsConnection = new Core.Web.WebSocketConnection(URL);
         this._eventsHandler = Core.method(this, this._onEvents);
     },
 
@@ -773,10 +772,10 @@ Echo.RemoteClient.WebSocketAsyncManager = Core.extend(Echo.RemoteClient.Abstract
     },
 
     /**
-    * Call is when an event occurs.
-    *
-    * For various events taking different approaches.
-    */
+     * Call is when an event occurs.
+     *
+     * For various events taking different approaches.
+     */
     _onEvents: function(e) {
         switch(e.type) {
             case Core.Web.WebSocketConnection.EVENT_OPEN:

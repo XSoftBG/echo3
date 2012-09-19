@@ -101,15 +101,15 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             var text = this.component.render("text");
             var icon = Echo.Sync.getEffectProperty(this.component, "icon", "disabledIcon", !this.enabled);
             if (text != null) {
-										var iconTextMargin = icon ? this.component.render("iconTextMargin", Echo.Sync.Button._defaultIconTextMargin) : 0;
-								    var orientation = Echo.Sync.TriCellTable.getOrientation(this.component, "textPosition");
-                    var tct = new Echo.Sync.TriCellTable(orientation, Echo.Sync.Extent.toPixels(iconTextMargin));
-                    this.renderButtonText(tct.tdElements[0], text);
-										if(icon)											
-                    	this.iconImg = this.renderButtonIcon(tct.tdElements[1], icon);
-										var table  = tct.tableElement;
-										table.style.height = "100%";
-                    this.div.appendChild(table);
+                var iconTextMargin = icon ? this.component.render("iconTextMargin", Echo.Sync.Button._defaultIconTextMargin) : 0;
+                var orientation = Echo.Sync.Button.ContentContainer.getOrientation(this.component, "textPosition");                    
+                var contnetContainer = new Echo.Sync.Button.ContentContainer(orientation, Echo.Sync.Extent.toPixels(iconTextMargin));
+                this.renderButtonText(contnetContainer._cellElements[0], text);
+                if(icon) {
+                    this.iconImg = this.renderButtonIcon(contnetContainer._cellElements[1], icon);
+                }
+                contnetContainer._tableDiv.style.height = "100%";
+                this.div.appendChild(contnetContainer._tableDiv);
             } else if (icon) {
                 // Icon only.
                 this.iconImg = this.renderButtonIcon(this.div, icon);
@@ -454,5 +454,118 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         containerElement.removeChild(element);
         this.renderAdd(update, containerElement);
         return false; // Child elements not supported: safe to return false.
+    }
+});
+
+Echo.Sync.Button.ContentContainer = Core.extend({
+  
+    $static: {
+        
+        /**
+         * @see Echo.Sync.TriCellTable#getOrientation(component, propertyName, defaultValue)
+         */
+        getOrientation: function(component, propertyName, defaultValue) {
+            return Echo.Sync.TriCellTable.getOrientation(component, propertyName, defaultValue);
+        },
+        
+        _createContainerPrototype: function() {
+            var tableDiv = document.createElement("div");
+            tableDiv.style.display = "table";
+            tableDiv.style.borderCollapse = "collapse";
+            tableDiv.style.padding = "0";            
+            return tableDiv;
+        },
+        
+        _createRowPrototype: function() {
+            var trDiv = document.createElement("div");
+            trDiv.style.display = "table-row";
+            trDiv.style.padding = "0";
+            return trDiv;
+        },
+        
+        _createCellPrototype: function() {
+            var tdDiv = document.createElement("div");
+            tdDiv.style.display = "table-cell";
+            tdDiv.style.padding = "0";                
+            tdDiv.style.verticalAlign = "middle";
+            return tdDiv;
+        },
+        
+        _containerPrototype: null,
+        
+        _rowPrototype: null,        
+        
+        _cellPrototype: null
+    },
+    
+    $load: function() {
+        this._containerPrototype = this._createContainerPrototype();
+        this._rowPrototype = this._createRowPrototype();
+        this._cellPrototype = this._createCellPrototype();
+    },
+    
+    _tableDiv: null,
+    _cellElements: null,
+    _marginCellElement: null,
+    
+    $construct: function(orientation, margin) {
+        this._tableDiv = Echo.Sync.Button.ContentContainer._containerPrototype.cloneNode(false);
+        this._cellElements = [
+            Echo.Sync.Button.ContentContainer._cellPrototype.cloneNode(false),
+            Echo.Sync.Button.ContentContainer._cellPrototype.cloneNode(false)
+          ];
+        
+        if (margin) {
+            this._marginCellElement = document.createElement("div");
+            if ((orientation & Echo.Sync.TriCellTable.VERTICAL) === 0) {
+                this._marginCellElement.style.cssText = "display:table-cell;width:" + margin + "px;height:1px;font-size:1px;line-height:0;";                
+            } else {
+                this._marginCellElement.style.cssText = "display:table-cell;width:1px;height:" + margin + "px;font-size:1px;line-height:0;";
+            }
+        }
+        
+        if (orientation & Echo.Sync.TriCellTable.VERTICAL) {
+            // Vertically oriented.
+            if (orientation & Echo.Sync.TriCellTable.INVERTED) {
+                // Inverted (bottom to top).
+                this._addRow(this._cellElements[1]);
+                this._addRow(this._marginCellElement);
+                this._addRow(this._cellElements[0]);
+            } else {
+                // Normal (top to bottom).
+                this._addRow(this._cellElements[0]);
+                this._addRow(this._marginCellElement);
+                this._addRow(this._cellElements[1]);
+            }
+        } else {
+            // Horizontally oriented.
+            var trDiv = Echo.Sync.Button.ContentContainer._rowPrototype.cloneNode(false);
+            if (orientation & Echo.Sync.TriCellTable.INVERTED) {
+                // Trailing to leading.
+                this._addColumn(trDiv, this._cellElements[1]);
+                this._addColumn(trDiv, this._marginCellElement);
+                this._addColumn(trDiv, this._cellElements[0]);
+            } else {
+                // Leading to trailing.
+                this._addColumn(trDiv, this._cellElements[0]);
+                this._addColumn(trDiv, this._marginCellElement);
+                this._addColumn(trDiv, this._cellElements[1]);
+            }
+            this._tableDiv.appendChild(trDiv);
+        }
+    },
+    
+    _addColumn: function(trDiv, tdDiv) {
+        if (tdDiv != null) {
+            trDiv.appendChild(tdDiv);
+        }
+    },
+    
+    _addRow: function(tdDiv) {
+        if (tdDiv != null) {
+            var trDiv = Echo.Sync.Button.ContentContainer._rowPrototype.cloneNode(false);
+            trDiv.appendChild(tdDiv);
+            this._tableDiv.appendChild(trDiv);
+        }
     }
 });
