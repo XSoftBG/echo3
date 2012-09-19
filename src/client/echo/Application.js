@@ -1939,9 +1939,9 @@ Echo.Update.ComponentUpdate = Core.extend({
      */
     _listenerUpdates: null,
     
-	/**
-	  * Indicates that current update is processed.
-	  */
+    /**
+     * Indicates that current update is processed.
+     */
     _processed: false,
 
     /**
@@ -2144,6 +2144,40 @@ Echo.Update.ComponentUpdate = Core.extend({
     },
     
     /**
+     * Determines if any children had their update during this update.
+     *
+     * @return true if manager who serves this update contains updates for the children
+     * @type Boolean
+     */
+    hasUpdatedChildren: function() {
+        for (var i = 0; i < this.parent.children.length; ++i) {
+            if (this._manager._componentUpdateMap[this.parent.children[i].renderId]) {
+                return true;
+            }
+        }
+        return false;
+    },
+        
+    /**
+     * Returns a collection of <code>Echo.Update.ComponentUpdate</code> 
+     * contains child's update during this update.
+     *
+     * @return updates of all updated children during this update
+     * @type Array
+     */
+    getChildrenUpdate: function() {
+        var updates = [];
+        for (var i = 0; i < this.parent.children.length; ++i) {
+            var update = this._manager._componentUpdateMap[this.parent.children[i].renderId];
+            if (update) {
+                updates.push(update);
+            }
+        }
+        return updates;
+    },
+    
+    
+    /**
      * Determines if any listeners of a specific type were added or removed
      * from the component.
      * 
@@ -2190,7 +2224,7 @@ Echo.Update.ComponentUpdate = Core.extend({
         }
         return false;
     },
-
+    
     /**
      * Determines if the set of updated property names is contained
      * within the specified set.  The provided object should have
@@ -2261,23 +2295,6 @@ Echo.Update.ComponentUpdate = Core.extend({
     },
     
     /**
-     * Returns a string representation.
-     * 
-     * @return a string representation
-     * @type String
-     */
-    toString: function() {
-        var s = "ComponentUpdate\n";
-        s += "- Parent: " + this.parent + "\n";
-        s += "- Adds: " + this._addedChildIds + "\n";
-        s += "- Removes: " + this._removedChildIds + "\n";
-        s += "- DescendantRemoves: " + this._removedDescendantIds + "\n";
-        s += "- Properties: " + Core.Debug.toString(this._propertyUpdates) + "\n";
-        s += "- LayoutDatas: " + this._updatedLayoutDataChildIds + "\n";
-        return s;
-    },
-    
-    /**
      * Records the update of the LayoutData of a child component.
      * 
      * @param {Echo.Component} child the child component whose layout data was updated
@@ -2317,21 +2334,39 @@ Echo.Update.ComponentUpdate = Core.extend({
         this._propertyUpdates[propertyName] = propertyUpdate;
      },
     
-	/**
-	 * Mark a current update as processed. (from Echo.Render.processUpdates(client))
-	 */
+    /**
+     * Mark a current update as processed. (from Echo.Render.processUpdates(client))
+     */
     markAsProcessed: function() {
-      this._processed = true;
+        this._processed = true;
     },
     
-	/**
-	 * Checks whether the current update is processed!
-	 *
+
+    /**
+     * Checks whether the current update is processed!
+     *
      * @return processed whether or not
      * @type boolean
-	 */
+     */
     isProcessed: function() {
-      return this._processed;
+        return this._processed;
+    },
+    
+    /**
+     * Returns a string representation.
+     * 
+     * @return a string representation
+     * @type String
+     */
+    toString: function() {
+        var s = "ComponentUpdate\n";
+        s += "- Parent: " + this.parent + "\n";
+        s += "- Adds: " + this._addedChildIds + "\n";
+        s += "- Removes: " + this._removedChildIds + "\n";
+        s += "- DescendantRemoves: " + this._removedDescendantIds + "\n";
+        s += "- Properties: " + Core.Debug.toString(this._propertyUpdates) + "\n";
+        s += "- LayoutDatas: " + this._updatedLayoutDataChildIds + "\n";
+        return s;
     }
 });
 

@@ -1456,7 +1456,8 @@ Core.Web.WebSocketConnection = Core.extend({
     },
 
    /**
-    * Transmits data using the socket. If the socket is not open, it must throw an exception.
+    * Transmits data using the socket.
+    * If the socket is not open, it must throw an exception.
     * 
     * @param {String, Blob or ArrayBuffer} data to be sent
     */
@@ -1468,8 +1469,8 @@ Core.Web.WebSocketConnection = Core.extend({
     },
 	
    /**
-    * Event listener for <code>open, close, error, message</code> events received from
-    * the <code>WebSocket</code>.
+    * Event listener for <code>open, close, error, message</code> 
+    * events received from the <code>WebSocket</code>.
     */
     _processReceivedEvents: function(e) {
         this._listenerList.fireEvent({type: e.type, source: this, data: e});
@@ -1494,21 +1495,26 @@ Core.Web.WebSocketConnection = Core.extend({
     },
 
    /**
-    * Closes of the socket. This method must be invoked when the socket 
-    * will no longer be used/processed.
+    * Closes of the socket.
+    * This method must be invoked when the socket will no longer be used/processed.
     */
     close: function() {
         if (this._disposed) {
             return;
         }
       
-        this._listenerList.removeAllListeners();        
-        var state = this.getState();
-        if (state == Core.Web.WebSocketConnection.STATE_CONNECTING || state == Core.Web.WebSocketConnection.STATE_OPEN) {
-            this._webSocket.close();
-        }        
-        this._webSocket = null;        
-        this._disposed = true;
+        try {
+            var state = this.getState();
+            if (state == Core.Web.WebSocketConnection.STATE_CONNECTING || state == Core.Web.WebSocketConnection.STATE_OPEN) {
+                this._webSocket.close();
+            }        
+        }
+        finally {
+            this._listenerList.removeAllListeners();
+            this._listenerList = null;
+            this._webSocket = null;
+            this._disposed = true;
+        }
     }
 });
 
@@ -1590,13 +1596,38 @@ Core.Web.HttpConnection = Core.extend({
         }
     },
     
+        
     /**
-     * Adds a response listener to be notified when a response is received from the connection.
-     * 
-     * @param {Function} l the listener to add
+     * Event listener for <code>readystatechange</code> events received from
+     * the <code>XMLHttpRequest</code>.
      */
-    addResponseListener: function(l) {
-        this._listenerList.addListener("response", l);
+    _processReadyStateChange: function() {
+        if (this._disposed) {
+            return;
+        }
+        
+        if (this._xmlHttpRequest.readyState == 4) {
+            var responseEvent;
+            try {
+                // 0 included as a valid response code for non-served applications.
+                var valid = !this._xmlHttpRequest.status || (this._xmlHttpRequest.status >= 200 && this._xmlHttpRequest.status <= 299);
+                responseEvent = {type: "response", source: this, valid: valid};
+            } catch (ex) {
+                responseEvent = {type: "response", source: this, valid: false, exception: ex};
+            }
+            
+            Core.Web.Scheduler.run(Core.method(this, function() {
+                if (this._disposed) {
+                    return;
+                }
+                try {
+                    this._listenerList.fireEvent(responseEvent);
+                }
+                finally {
+                    this.dispose();
+                }
+            }));
+        }
     },
     
     /**
@@ -1633,36 +1664,27 @@ Core.Web.HttpConnection = Core.extend({
         
         this._xmlHttpRequest.open(this._method, this._url, true);
 
-        // Set headers.
-        if (this._requestHeaders && (usingActiveXObject || this._xmlHttpRequest.setRequestHeader)) {
-            for(var h in this._requestHeaders) {
-                try {
-                    this._xmlHttpRequest.setRequestHeader(h, this._requestHeaders[h]);
-                } catch (e) {
-                    throw new Error("Failed to set header \"" + h + "\"");
+        if (usingActiveXObject || this._xmlHttpRequest.setRequestHeader) {
+            
+            // Set headers, if supplied.
+            if (this._requestHeaders) {
+                for(var h in this._requestHeaders) {
+                    try {
+                        this._xmlHttpRequest.setRequestHeader(h, this._requestHeaders[h]);
+                    } catch (e) {
+                        throw new Error("Failed to set header \"" + h + "\"");
+                    }
                 }
             }
-        }
-        
-        // Set Content-Type, if supplied.
-        if (this._contentType && (usingActiveXObject || this._xmlHttpRequest.setRequestHeader)) {
-            this._xmlHttpRequest.setRequestHeader("Content-Type", this._contentType);
+            
+            // Set Content-Type, if supplied.
+            if (this._contentType) {
+                this._xmlHttpRequest.setRequestHeader("Content-Type", this._contentType);
+            }
         }
 
         // Execute request.
         this._xmlHttpRequest.send(this._messageObject ? this._messageObject : null);
-    },
-    
-    /**
-     * Disposes of the connection.  This method must be invoked when the connection 
-     * will no longer be used/processed.
-     */
-    dispose: function() {
-        this._listenerList = null;
-        this._messageObject = null;
-        this._xmlHttpRequest = null;
-        this._disposed = true;
-        this._requestHeaders = null;
     },
     
     /**
@@ -1671,6 +1693,19 @@ Core.Web.HttpConnection = Core.extend({
      */
     getResponseHeader: function(header) {
         return this._xmlHttpRequest ? this._xmlHttpRequest.getResponseHeader(header) : null;
+    },
+    
+    /**
+     * Sets a header in the request.
+     * 
+     * @param {String} header the header to retrieve
+     * @param {String} value the value of the header
+     */
+    setRequestHeader: function(header, value) {
+        if (!this._requestHeaders) {
+            this._requestHeaders = { };
+        } 
+        this._requestHeaders[header] = value;
     },
     
     /**
@@ -1714,31 +1749,13 @@ Core.Web.HttpConnection = Core.extend({
     },
     
     /**
-     * Event listener for <code>readystatechange</code> events received from
-     * the <code>XMLHttpRequest</code>.
+     * Adds a response listener to be notified when a response is received from the connection.
+     * 
+     * @param {Function} l the listener to add
      */
-    _processReadyStateChange: function() {
-        if (this._disposed) {
-            return;
-        }
-        
-        if (this._xmlHttpRequest.readyState == 4) {
-            var responseEvent;
-            try {
-                // 0 included as a valid response code for non-served applications.
-                var valid = !this._xmlHttpRequest.status ||  
-                        (this._xmlHttpRequest.status >= 200 && this._xmlHttpRequest.status <= 299);
-                responseEvent = {type: "response", source: this, valid: valid};
-            } catch (ex) {
-                responseEvent = {type: "response", source: this, valid: false, exception: ex};
-            }
-            
-            Core.Web.Scheduler.run(Core.method(this, function() {
-                this._listenerList.fireEvent(responseEvent);
-                this.dispose();
-            }));
-        }
-    },
+    addResponseListener: function(l) {
+        this._listenerList.addListener("response", l);
+    },    
     
     /**
      * Removes a response listener to be notified when a response is received from the connection.
@@ -1750,16 +1767,15 @@ Core.Web.HttpConnection = Core.extend({
     },
     
     /**
-     * Sets a header in the request.
-     * 
-     * @param {String} header the header to retrieve
-     * @param {String} value the value of the header
+     * Disposes of the connection.  This method must be invoked when the connection 
+     * will no longer be used/processed.
      */
-    setRequestHeader: function(header, value) {
-        if (!this._requestHeaders) {
-            this._requestHeaders = { };
-        } 
-        this._requestHeaders[header] = value;
+    dispose: function() {
+        this._listenerList = null;
+        this._messageObject = null;
+        this._xmlHttpRequest = null;
+        this._disposed = true;
+        this._requestHeaders = null;
     }
 });
 
