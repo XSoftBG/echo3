@@ -37,6 +37,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import nextapp.echo.app.util.DomUtil;
+import nextapp.echo.webcontainer.service.CascadingStyleSheetsService;
+import nextapp.echo.webcontainer.service.JavaScriptService;
 import nextapp.echo.webcontainer.service.StringVersionService;
 
 /**
@@ -101,16 +103,23 @@ public class ServerMessage {
         if (addedLibraries.contains(serviceId)) {
             return;
         }
-        Element libraryElement = document.createElement("lib");		
-        StringBuffer nodeText = new StringBuffer(serviceId);
-        Service service = WebContainerServlet.getServiceRegistry().get(serviceId);
+        
+        final Element libraryElement = document.createElement("lib");		
+        final StringBuilder nodeText = new StringBuilder(serviceId);
+        
+        final Service service = WebContainerServlet.getServiceRegistry().get(serviceId);
+        
+        final String type = service instanceof JavaScriptService ? "js" : service instanceof CascadingStyleSheetsService ? "css" : "unknown";
+        libraryElement.setAttribute("type", type);
+        
         if (service instanceof StringVersionService) {
             StringVersionService svs = (StringVersionService) service;
             if (svs.getVersionAsString() != null) {
                 nodeText.append("&v=");
                 nodeText.append(((StringVersionService)service).getVersionAsString());
             }
-        }
+        }        
+        
         libraryElement.appendChild(document.createTextNode(nodeText.toString()));		
         librariesElement.appendChild(libraryElement);
         addedLibraries.add(serviceId);

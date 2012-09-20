@@ -1315,7 +1315,8 @@ Echo.RemoteClient.ServerMessage = Core.extend({
                 if (element.nodeType == 1) {
                     if (element.nodeName == "lib") {
                         var url = this.client._getLibraryServiceUrl(element.firstChild.data);
-                        libraryGroup.add(url);
+                        var type = element.getAttribute("type");
+                        libraryGroup.add(url, type);
                     }
                 }
                 element = element.nextSibling;
