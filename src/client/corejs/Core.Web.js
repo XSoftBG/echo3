@@ -1997,11 +1997,6 @@ Core.Web.Key = {
  * @class
  */
 Core.Web.Library = {
-    
-    /**
-     *
-     */
-    HEAD_ELEMENT: Core.Web.DOM.getChildElementByTagName(document.documentElement, "HEAD"),
 
     /**
      * Set of loaded libraries (keys are library urls, value is true when library has been loaded).
@@ -2064,15 +2059,14 @@ Core.Web.Library = {
          * Libraries which have previously been loaded will not be loaded again.
          *
          * @param {String} libraryUrl the URL from which to retrieve the library.
-         * * @param {String} libraryType the TYPE of this library.
          */
-        add: function(libraryUrl, libraryType) {            
+        add: function(libraryUrl) {
             if (Core.Web.Library._loadedLibraries[libraryUrl]) {
                 // Library already loaded: ignore.
                 return;
             }
             
-            var libraryItem = new Core.Web.Library._Item(this, libraryUrl, libraryType);
+            var libraryItem = new Core.Web.Library._Item(this, libraryUrl);
             this._libraries.push(libraryItem);
         },
         
@@ -2138,13 +2132,6 @@ Core.Web.Library = {
             }
         },
         
-        _notifyLoaded: function() {
-            ++this._loadedCount;
-            if (this._loadedCount == this._totalCount) {
-                this._install();
-            }
-        },
-        
         /**
          * Initializes library loading.  When this method is invoked
          * the libraries will be asynchronously loaded.  This method
@@ -2155,7 +2142,7 @@ Core.Web.Library = {
         load: function() {
             this._totalCount = this._libraries.length;
             for (var i = 0; i < this._libraries.length; ++i) {
-                this._libraries[i]._load();
+                this._libraries[i]._retrieve();
             }
         },
         
@@ -2173,25 +2160,9 @@ Core.Web.Library = {
      * Representation of a single library to be loaded within a group
      */    
     _Item: Core.extend({
-        
-        $static: {
-            
-            /**
-             *
-             */
-            TYPE_JS: "js",
-            
-            /**
-             *
-             */
-            TYPE_CSS: "css"
-        },
     
         /** URL Of library to load. */
         _url: null,
-        
-        /** */
-        _type: null,
         
         /** Containing library group. */
         _group: null,
@@ -2207,32 +2178,12 @@ Core.Web.Library = {
          * 
          * @param {Core.Web.Library.Group} group the library group in which the item is contained
          * @param {String} url the URL from which the library may be retrieved
-         * @param {String} type the TYPE of library
          * @constructor
          */
-        $construct: function(group, url, type) {
+        $construct: function(group, url) {
             this._url = url;
-            this._type = type;
             this._group = group;
         },
-        
-        
-        _load: function() {
-            var script = document.createElement("script")
-            script.type = "text/javascript";
-            Core.Web.Event.add(script, "load", Core.method(this, function() { console.log("LOADDDED .....") }), false);
-            script.src = "http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js";
-            document.getElementsByTagName("head")[0].appendChild(script);        
-        },
-        
-        _loadListener: function(e) {
-            if (e.type === "load") {
-                
-            } else if (e.type === "error") {
-                
-            }
-        }, 
-        
         
         /**
          * Event listener for response from the HttpConnection used to retrieve the library.
