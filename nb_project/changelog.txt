@@ -1,38 +1,58 @@
-echo3
+echo3:
+---------------
+* Added FocusListener - gotFocus/lostFocus.
+* Added background fading to modal windows.
+* Fixed modal windows - now able to show modal window from another modal window.
+* Component width and height now can be set in percentage.
+* Fixed issue with property updates - sometimes updates were lost after setting property.
+* Added new async monitor based on WebSockets.
+* Added property 'box-shadow' to all components.
+* Components stores their previous ID when moved to another parent.
+* New properties in TextComponents: trim, upper case, lower case, auto select content.
+* Optimizations in javascript.
 
-Added background fading to modal windows
-Fixed modal windows - now able to show modal window from another modal window
-Component width and height now can be set in percentage
 
-Fixed issue with property updates - sometimes updates were lost after setting property // secure updates?
-Added new async monitor based on websockets
-Added property 'box-shadow' to all components
-Components stores their previous ID when moved to another parent
+echo3extras:
+---------------
+* New methods in ContextMenu - added setMenuVisible.
+* Common interface for TabPane and AccordionPane.
+* Updates in Tree:
+  - node deleting wasn't working;
+  - making nodes visible / invisible wasn't working.
 
-Updates in TextComponents:
- - trim
- - upper case
- - lower case
- - auto select content
 
-Other minor updates
+echopoint:
+---------------
+* Added new component - Combobox with following features:
+  - setLazyMode(portion) - The "portion" parameter determins on what portions the calculated elements should be visualized in the menu.
+    Using this mechanism you may load unlimited count of elements in the menu.
+  - setAddableMode - if you switch off the addable mode you can not add new entries.
+  - pageup/pagedown scrolling in the drop-down menu.
+  - optimization - now we can load a few thousand entries without lazy_mode.
+  - setSelectedOptionForeground - sets the default foreground color of the selected option.
 
-echo3extras и echopoint и echolot
+* Added new component - CKeditor.
+* Added different download modes to DownloadService.
+* Added new command - RestartApp.
+* Added new component - Gallery.
+* Fixed CloseBrowser for Google Chrome.
+* Added new method in IntegerField: setNegative - allows to enter negative values.
+* Added new method NumberField: setNegative - allows to enter negative values.
+* RegexTextField:
+  - ValidationListener - callback when expression is valid.
+  - setFilter - determines which characters are allowed.
+  - setFilterMsg(msg) - message "msg" is displayed if an attempt to enter an invalid character.
+  - isValid - is the expression valid.
+* AbstractHtmlComponent:
+  - processForms - change all forms elements to div elements.
+  - ContentChangedListener - callback when content has changed.
 
-Added new component - Autolookup selectfield
-Added new component - ckeditor
-Fixed bugs in RegexField
-Added ValidationListener in RegexField
-Added different download modes to DownloadService
-Added RestartApp service
-Added new component - gallery
-Fixed CloseApp for Google Chrome
+echolot:
+---------------
+* Updates in FlexiTable:
+   - now able to contain other components;
+   - optimizations in javascript;
+   - fixes bugs.
+* Processing new keys in KeystrokeListener.
 
-Updates in FlexiTable - now able to contain other components
 
-Updates in ContextMenu - added setMenuVisible
-Updates in Tree:
- - node deleting wasn't working
- - making nodes visible / invisible wasn't working 
-
-Other minor updates
