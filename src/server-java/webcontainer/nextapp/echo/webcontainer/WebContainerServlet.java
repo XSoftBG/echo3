@@ -51,6 +51,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nextapp.echo.app.util.Context;
 
 /**
  * Web container <code>HttpServlet</code> implementation.
@@ -188,8 +189,16 @@ public abstract class WebContainerServlet extends HttpServlet {
      * 
      * @return the relevant <code>Connection</code>
      */
-    public static final Connection getActiveConnection() {
+    public static Connection getActiveConnection() {
         return (Connection) activeConnection.get();
+    }
+    
+    /**
+     * 
+     * @param connection 
+     */
+    public static void setActiveConnection(Connection connection) {
+        activeConnection.set(connection);
     }
     
     /**
@@ -246,12 +255,21 @@ public abstract class WebContainerServlet extends HttpServlet {
         }
     }
     
+    private final ClientMessageProcessor defaultClientMessageProcessor = new ClientMessageProcessor() {
+        @Override
+        public void process(Context context) throws IOException {
+            ClientMessage clientMessage = (ClientMessage) context.get(ClientMessage.class);
+            clientMessage.process(context);
+        }
+    };
+    
     /** Collection of JavaScript <code>Service</code>s which should be initially loaded. */
     private List initScripts = null; 
     
     /** Collection of CSS style sheet <code>Service</code>s which should be initially loaded. */
     private List initStyleSheets = null;
     
+    /** */
     private WebSocketConnectionHandler wsHandler = null;
     
     /**
@@ -402,6 +420,14 @@ public abstract class WebContainerServlet extends HttpServlet {
     }
     
     /**
+     * 
+     * @return 
+     */
+    protected ClientMessageProcessor getClientMessageProcessor() {
+        return defaultClientMessageProcessor;
+    }
+    
+    /**
      * Creates a new <code>ApplicationInstance</code> for visitor to an 
      * application.
      * 
@@ -446,17 +472,7 @@ public abstract class WebContainerServlet extends HttpServlet {
             
             service.service(conn);
             
-        } catch (ServletException ex) {
-            if (conn != null) {
-                conn.disposeUserInstance();
-            }
-            processError(request, response, ex);
-        } catch (IOException ex) {
-            if (conn != null) {
-                conn.disposeUserInstance();
-            }
-            processError(request, response, ex);
-        } catch (RuntimeException ex) {
+        } catch (ServletException | IOException | RuntimeException ex) {
             if (conn != null) {
                 conn.disposeUserInstance();
             }

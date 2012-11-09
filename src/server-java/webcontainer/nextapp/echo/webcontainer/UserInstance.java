@@ -563,7 +563,7 @@ public class UserInstance implements Serializable {
      * 
      * @param active the new active state
      */
-    void setActive(boolean active) {
+    public void setActive(boolean active) {
         if (active) {
             ApplicationInstance.setActive(applicationInstance);
         } else {

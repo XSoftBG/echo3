@@ -158,9 +158,10 @@ public class InputProcessor {
             }
         }
         
+        // Only process the client message if client/server are synchronized.
         if (!syncState.isOutOfSync()) {
-            // Only process the client message if client/server are synchronized.
-            clientMessage.process(context);
+            final ClientMessageProcessor processor = conn.getServlet().getClientMessageProcessor();
+            processor.process(context);
         }
     }
 }
