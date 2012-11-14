@@ -602,8 +602,11 @@ implements Serializable {
     void notifyComponentPropertyChange(Component parent, String propertyName, Object oldValue, Object newValue) {
         // Ensure current thread is a user interface thread.
         if (this != activeInstance.get()) {
-            throw new IllegalStateException(
-                    "Attempt to update state of application user interface outside of user interface thread.");
+            throw new IllegalStateException("Attempt to update state of application user interface outside of user interface thread"
+                    + " ("
+                    + "this: " + this.hashCode() + ", active: " + (activeInstance.get() != null ? activeInstance.get().hashCode() : null) + ", "
+                    + "thread: " + Thread.currentThread().getName()
+                    + ").");
         }
 
         ServerUpdateManager serverUpdateManager = updateManager.getServerUpdateManager();
