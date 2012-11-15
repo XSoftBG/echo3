@@ -271,7 +271,7 @@ public abstract class WebContainerServlet extends HttpServlet {
     
     /** */
     private WebSocketConnectionHandler wsHandler = null;
-    
+
     /**
      * Default constructor.
      */
@@ -281,7 +281,13 @@ public abstract class WebContainerServlet extends HttpServlet {
         services.add(SessionExpiredService.INSTANCE);
         services.add(SynchronizeService.INSTANCE);
         services.add(WindowHtmlService.INSTANCE);
-        services.add(AsyncMonitorService.INSTANCE);
+        services.add(AsyncMonitorService.INSTANCE);         
+    }
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        PropertySerialPeerFactory.init();
     }
     
     /**
