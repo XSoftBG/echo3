@@ -513,7 +513,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      */
     _processTitleBarMouseMove: function(e) {
         this._setBounds({
-            x: this._dragInit.x + e.clientX - this._dragOrigin.x, 
+            x: this._dragInit.x + e.clientX - this._dragOrigin.x,
             y: this._dragInit.y + e.clientY - this._dragOrigin.y
         }, true);
         Echo.Render.notifyMove(this.component);
@@ -984,16 +984,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         var pxBounds = {}, // Pixel bounds (x/y/width/height as numeric pixel values. 
             calculatedHeight = false; // Flag indicating whether height is calculated or default.
         
-        if (userAdjusting) {
-            // Constrain user adjustment specBounds coordinate to be an on-screen negative value.
-            // if userAdjusting is true, x/y values are guaranteed to be integers.
-            if (specBounds.x != null && specBounds.x < 0) {
-                specBounds.x = 0;
-            }
-            if (specBounds.y != null && specBounds.y < 0) {
-                specBounds.y = 0;
-            }
-        }
+//        if (userAdjusting) {
+//            // Constrain user adjustment specBounds coordinate to be an on-screen negative value.
+//            // if userAdjusting is true, x/y values are guaranteed to be integers.
+//            if (specBounds.x != null && specBounds.x < 0) {
+//                specBounds.x = 0;
+//            }
+//            if (specBounds.y != null && specBounds.y < 0) {
+//                specBounds.y = 0;
+//            }
+//        }
         
         // Determine pixel width based on specified extent width.
         if (specBounds.width != null) {
@@ -1087,10 +1087,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
                 }
             } else {
                 pxBounds.x = Math.round(Echo.Sync.Extent.toPixels(specBounds.x, true));
-                if (pxBounds.x < 0) {
-                    // Negative value: position window from right side of screen.
-                    pxBounds.x += this._containerSize.width - pxBounds.width;
-                }
+//                if (pxBounds.x < 0) {
+//                    // Negative value: position window from right side of screen.
+//                    pxBounds.x += this._containerSize.width - pxBounds.width;
+//                }
             }
         }
 
@@ -1104,10 +1104,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
                 }
             } else {
                 pxBounds.y = Math.round(Echo.Sync.Extent.toPixels(specBounds.y, false));
-                if (pxBounds.y < 0) {
-                    // Negative value: position window from bottom side of screen
-                    pxBounds.y += this._containerSize.height - pxBounds.height;
-                }
+//                if (pxBounds.y < 0) {
+//                    // Negative value: position window from bottom side of screen
+//                    pxBounds.y += this._containerSize.height - pxBounds.height;
+//                }
             }
         }
         
@@ -1180,15 +1180,15 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     
         // Constrain x position, store value in _rendered property.
         if (pxBounds.x != null) {
-            // Ensure right edge of window is on-screen.
-            if (this._containerSize.width > 0 && pxBounds.x > this._containerSize.width - this._rendered.width) {
-                pxBounds.x = this._containerSize.width - this._rendered.width;
-            }
+//            // Ensure right edge of window is on-screen.
+//            if (this._containerSize.width > 0 && pxBounds.x > this._containerSize.width - this._rendered.width) {
+//                pxBounds.x = this._containerSize.width - this._rendered.width;
+//            }
 
-            // Ensure left edge of window is on-screen.
-            if (pxBounds.x < 0) {
-                pxBounds.x = 0;
-            }
+//            // Ensure left edge of window is on-screen.
+//            if (pxBounds.x < 0) {
+//                pxBounds.x = 0;
+//            }
 
             // Store.
             this._rendered.x = Math.round(pxBounds.x);
@@ -1196,15 +1196,15 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     
         // Constrain y position, store value in _rendered property.
         if (pxBounds.y != null) {
-            // Ensure bottom edge of window is on-screen.
-            if (this._containerSize.height > 0 && pxBounds.y > this._containerSize.height - this._rendered.height) {
-                pxBounds.y = this._containerSize.height - this._rendered.height;
-            }
+//            // Ensure bottom edge of window is on-screen.
+//            if (this._containerSize.height > 0 && pxBounds.y > this._containerSize.height - this._rendered.height) {
+//                pxBounds.y = this._containerSize.height - this._rendered.height;
+//            }
 
-            // Ensure top edge of window is on-screen.
-            if (pxBounds.y < 0) {
-                pxBounds.y = 0;
-            }
+//            // Ensure top edge of window is on-screen.
+//            if (pxBounds.y < 0) {
+//                pxBounds.y = 0;
+//            }
 
             // Store.
             this._rendered.y = Math.round(pxBounds.y);
