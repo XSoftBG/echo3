@@ -48,6 +48,9 @@ implements PaneContainer {
     public static final String PROPERTY_INSETS = "insets";
     public static final String PROPERTY_WIDTH = "width";
     public static final String PROPERTY_HEIGHT = "height";
+    public static final String PROPERTY_OVERFLOW = "overflow";
+
+    public enum Overflow { HIDDEN, SCROLL, AUTO };
 
     /**
      * Returns the background image.
@@ -116,7 +119,23 @@ implements PaneContainer {
     public Extent getWidth() {
         return (Extent) get(PROPERTY_WIDTH);
     }
-    
+
+
+        /**
+     * Returns the overflow state, describing how the panel will behave when
+     * the content is larger than display area.
+     *
+     * @return the overflow state, one of the following values:
+     *         <ul>
+     *         <li><code>Overflow.AUTO</code>: provide scrollbars as necessary</li>
+     *         <li><code>Overflow.HIDDEN</code>: never display scrollbars, hide overflow content</li>
+     *         <li><code>Overflow.SCROLL</code>: always display scrollbars</li>
+     *         </ul>
+     */
+    public Overflow getOverflow() {
+        return (Overflow)get(PROPERTY_OVERFLOW);
+    }
+
     /**
      * Sets the <code>Alignment</code> describing how the child component is aligned within the <code>Panel</code>.
      * 
@@ -182,5 +201,20 @@ implements PaneContainer {
      */
     public void setWidth(Extent newValue) {
         set(PROPERTY_WIDTH, newValue);
+    }
+
+    /**
+     * Sets the overflow state, describing how the panel will behave when
+     * the content is larger than display area.
+     *
+     * @param newValue the overflow state, one of the following values:
+     *        <ul>
+     *         <li><code>Overflow.AUTO</code>: provide scrollbars as necessary</li>
+     *         <li><code>Overflow.HIDDEN</code>: never display scrollbars, hide overflow content</li>
+     *         <li><code>Overflow.SCROLL</code>: always display scrollbars</li>
+     *        </ul>
+     */
+    public void setOverflow(Overflow newValue) {
+        set(PROPERTY_OVERFLOW, newValue);
     }
 }
