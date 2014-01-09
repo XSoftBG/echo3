@@ -269,7 +269,7 @@ public abstract class WebContainerServlet extends HttpServlet {
     /** Collection of CSS style sheet <code>Service</code>s which should be initially loaded. */
     private List initStyleSheets = null;
     
-    /** */
+    /** Representation of web socket connection. */
     private WebSocketConnectionHandler wsHandler = null;
 
     /**
@@ -362,22 +362,16 @@ public abstract class WebContainerServlet extends HttpServlet {
      * @return The service corresponding to the specified Id.
      */
     private static Service getService(String id, boolean hasInstance) {
-        Service service;
-        
-        service = services.get(id);
+      
         if (id == null) {
-            if (hasInstance) {
-                id = SERVICE_ID_DEFAULT;
-            } else {
-                id = SERVICE_ID_NEW_INSTANCE;
-            }
+            id = hasInstance ? SERVICE_ID_DEFAULT : SERVICE_ID_NEW_INSTANCE;
         } else {
             if (!hasInstance) {
                 id = SERVICE_ID_SESSION_EXPIRED;
             }
         }
         
-        service = services.get(id);
+        final Service service = services.get(id);
 
         if (service == null) {
             if (SERVICE_ID_DEFAULT.equals(id)) {
@@ -453,15 +447,14 @@ public abstract class WebContainerServlet extends HttpServlet {
         try {
             conn = new Connection(this, request, response);
             activeConnection.set(conn);
-            String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
-            Service service = getService(serviceId, conn.getUserInstanceContainer() != null);
+            final String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
+            final Service service = getService(serviceId, conn.getUserInstanceContainer() != null);
             if (service == null) {
                 throw new ServletException("Service id \"" + serviceId + "\" not registered.");
             }
-            int version = service.getVersion();
             
             // Set caching directives.
-            if ((!DISABLE_CACHING) && version != Service.DO_NOT_CACHE) {
+            if (!DISABLE_CACHING && service.getVersion() != Service.DO_NOT_CACHE) {
                 // Setting all of the following (possibly with the exception of "Expires")
                 // are *absolutely critical* in order to ensure proper caching of resources
                 // with Internet Explorer 6.  Without "Last-Modified", IE6 appears to not
