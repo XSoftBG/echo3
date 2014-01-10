@@ -366,13 +366,15 @@ public abstract class WebContainerServlet extends HttpServlet {
         if (id == null) {
             id = hasInstance ? SERVICE_ID_DEFAULT : SERVICE_ID_NEW_INSTANCE;
         } else {
-            if (!hasInstance) {
+            if (services.get(id) != null) {
+              if (!hasInstance && !(services.get(id) instanceof ServiceWithoutUI)) {
                 id = SERVICE_ID_SESSION_EXPIRED;
+              }
             }
         }
-        
-        final Service service = services.get(id);
 
+        final Service service = services.get(id);
+        
         if (service == null) {
             if (SERVICE_ID_DEFAULT.equals(id)) {
                 throw new RuntimeException("Service not registered: SERVICE_ID_DEFAULT");
@@ -382,7 +384,7 @@ public abstract class WebContainerServlet extends HttpServlet {
                 throw new RuntimeException("Service not registered: SERVICE_ID_SESSION_EXPIRED");
             }
         }
-        
+
         return service;
     }
     
@@ -445,7 +447,7 @@ public abstract class WebContainerServlet extends HttpServlet {
     throws IOException, ServletException {
         Connection conn = null;
         try {
-            conn = new Connection(this, request, response);
+              conn = new Connection(this, request, response);
             activeConnection.set(conn);
             final String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
             final Service service = getService(serviceId, conn.getUserInstanceContainer() != null);
