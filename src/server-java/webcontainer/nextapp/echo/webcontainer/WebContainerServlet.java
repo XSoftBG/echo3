@@ -447,7 +447,7 @@ public abstract class WebContainerServlet extends HttpServlet {
     throws IOException, ServletException {
         Connection conn = null;
         try {
-              conn = new Connection(this, request, response);
+            conn = new Connection(this, request, response);
             activeConnection.set(conn);
             final String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
             final Service service = getService(serviceId, conn.getUserInstanceContainer() != null);

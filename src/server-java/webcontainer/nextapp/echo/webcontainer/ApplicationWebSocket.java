@@ -39,8 +39,8 @@ import nextapp.echo.app.util.Uid;
  * @author Miro Yozov
  */
 public abstract class ApplicationWebSocket {
-    private static int SYNC_CLOSE_CODE = 8807;
-    private static int DISPOSE_CLOSE_CODE = 8806;
+    private static final int SYNC_CLOSE_CODE = 8807;
+    private static final int DISPOSE_CLOSE_CODE = 8806;
     
     public interface Connection {
         public void close();
