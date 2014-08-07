@@ -51,6 +51,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nextapp.echo.app.util.Context;
 
 /**
  * Web container <code>HttpServlet</code> implementation.
@@ -188,8 +189,16 @@ public abstract class WebContainerServlet extends HttpServlet {
      * 
      * @return the relevant <code>Connection</code>
      */
-    public static final Connection getActiveConnection() {
+    public static Connection getActiveConnection() {
         return (Connection) activeConnection.get();
+    }
+    
+    /**
+     * 
+     * @param connection 
+     */
+    public static void setActiveConnection(Connection connection) {
+        activeConnection.set(connection);
     }
     
     /**
@@ -246,14 +255,23 @@ public abstract class WebContainerServlet extends HttpServlet {
         }
     }
     
+    private final ClientMessageProcessor defaultClientMessageProcessor = new ClientMessageProcessor() {
+        @Override
+        public void process(Context context) throws IOException {
+            ClientMessage clientMessage = (ClientMessage) context.get(ClientMessage.class);
+            clientMessage.process(context);
+        }
+    };
+    
     /** Collection of JavaScript <code>Service</code>s which should be initially loaded. */
     private List initScripts = null; 
     
     /** Collection of CSS style sheet <code>Service</code>s which should be initially loaded. */
     private List initStyleSheets = null;
     
+    /** Representation of web socket connection. */
     private WebSocketConnectionHandler wsHandler = null;
-    
+
     /**
      * Default constructor.
      */
@@ -263,7 +281,13 @@ public abstract class WebContainerServlet extends HttpServlet {
         services.add(SessionExpiredService.INSTANCE);
         services.add(SynchronizeService.INSTANCE);
         services.add(WindowHtmlService.INSTANCE);
-        services.add(AsyncMonitorService.INSTANCE);
+        services.add(AsyncMonitorService.INSTANCE);         
+    }
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        PropertySerialPeerFactory.init();
     }
     
     /**
@@ -338,23 +362,19 @@ public abstract class WebContainerServlet extends HttpServlet {
      * @return The service corresponding to the specified Id.
      */
     private static Service getService(String id, boolean hasInstance) {
-        Service service;
-        
-        service = services.get(id);
+      
         if (id == null) {
-            if (hasInstance) {
-                id = SERVICE_ID_DEFAULT;
-            } else {
-                id = SERVICE_ID_NEW_INSTANCE;
-            }
+            id = hasInstance ? SERVICE_ID_DEFAULT : SERVICE_ID_NEW_INSTANCE;
         } else {
-            if (!hasInstance) {
+            if (services.get(id) != null) {
+              if (!hasInstance && !(services.get(id) instanceof ServiceWithoutUI)) {
                 id = SERVICE_ID_SESSION_EXPIRED;
+              }
             }
         }
-        
-        service = services.get(id);
 
+        final Service service = services.get(id);
+        
         if (service == null) {
             if (SERVICE_ID_DEFAULT.equals(id)) {
                 throw new RuntimeException("Service not registered: SERVICE_ID_DEFAULT");
@@ -364,7 +384,7 @@ public abstract class WebContainerServlet extends HttpServlet {
                 throw new RuntimeException("Service not registered: SERVICE_ID_SESSION_EXPIRED");
             }
         }
-        
+
         return service;
     }
     
@@ -402,6 +422,14 @@ public abstract class WebContainerServlet extends HttpServlet {
     }
     
     /**
+     * 
+     * @return 
+     */
+    protected ClientMessageProcessor getClientMessageProcessor() {
+        return defaultClientMessageProcessor;
+    }
+    
+    /**
      * Creates a new <code>ApplicationInstance</code> for visitor to an 
      * application.
      * 
@@ -421,15 +449,14 @@ public abstract class WebContainerServlet extends HttpServlet {
         try {
             conn = new Connection(this, request, response);
             activeConnection.set(conn);
-            String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
-            Service service = getService(serviceId, conn.getUserInstanceContainer() != null);
+            final String serviceId = request.getParameter(SERVICE_ID_PARAMETER);
+            final Service service = getService(serviceId, conn.getUserInstanceContainer() != null);
             if (service == null) {
                 throw new ServletException("Service id \"" + serviceId + "\" not registered.");
             }
-            int version = service.getVersion();
             
             // Set caching directives.
-            if ((!DISABLE_CACHING) && version != Service.DO_NOT_CACHE) {
+            if (!DISABLE_CACHING && service.getVersion() != Service.DO_NOT_CACHE) {
                 // Setting all of the following (possibly with the exception of "Expires")
                 // are *absolutely critical* in order to ensure proper caching of resources
                 // with Internet Explorer 6.  Without "Last-Modified", IE6 appears to not
@@ -446,17 +473,7 @@ public abstract class WebContainerServlet extends HttpServlet {
             
             service.service(conn);
             
-        } catch (ServletException ex) {
-            if (conn != null) {
-                conn.disposeUserInstance();
-            }
-            processError(request, response, ex);
-        } catch (IOException ex) {
-            if (conn != null) {
-                conn.disposeUserInstance();
-            }
-            processError(request, response, ex);
-        } catch (RuntimeException ex) {
+        } catch (ServletException | IOException | RuntimeException ex) {
             if (conn != null) {
                 conn.disposeUserInstance();
             }

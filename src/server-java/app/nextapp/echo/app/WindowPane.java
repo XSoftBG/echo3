@@ -127,6 +127,7 @@ implements FloatingPane, ModalSupport, PaneContainer {
 
     private MaximizedState  _preMaximizedState = null;
     private static final Extent PERCENT_100 = new Extent(100, Extent.PERCENT);
+    private static final Extent PIXEL_0 = new Extent(0, Extent.PX);
 
     /**
      * Creates a  new <code>WindowPane</code>.
@@ -1134,9 +1135,11 @@ implements FloatingPane, ModalSupport, PaneContainer {
                 setPositionY(this._preMaximizedState.y);
             }
         } else {
-            _preMaximizedState = new MaximizedState( getPositionX(), getPositionY(), getWidth(), getHeight() );
+            _preMaximizedState = new MaximizedState(getPositionX(), getPositionY(), getWidth(), getHeight());
             setWidth(PERCENT_100);
             setHeight(PERCENT_100);
+            setPositionX(WindowPane.PIXEL_0);
+            setPositionY(WindowPane.PIXEL_0);
         }
         fireWindowMaximized();
     }

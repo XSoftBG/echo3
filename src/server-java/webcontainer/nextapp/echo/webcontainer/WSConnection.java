@@ -50,22 +50,23 @@ public class WSConnection extends AbstractConnection {
     }
   
     private final String protocol;
-    private ApplicationWebSocket applicationWebSocket = null;
+    private ApplicationWebSocket applicationWebSocket;
 
     public WSConnection(HttpServlet servlet, HttpServletRequest request, String protocol)
     {
       super(servlet, request);
       this.protocol = protocol;
       HttpSession session = request.getSession();
-      if (session != null) {
+      if (session != null)
           applicationWebSocket = (ApplicationWebSocket) session.getAttribute(getWebSocketSessionKey(this.servlet));
-      }
+      else
+          applicationWebSocket = null;
     }
   
     protected void storeUiid() {
-        String uiidParam = this.request.getParameter("uiid");
-        if (uiidParam != null) {
-            uiid = uiidParam;
+        final String uiid_param = this.request.getParameter("uiid");
+        if (uiid_param != null) {
+            uiid = uiid_param;
         }
     }
     
@@ -74,25 +75,33 @@ public class WSConnection extends AbstractConnection {
     }
 
     public ApplicationWebSocket getApplicationWebSocket() {
-      return applicationWebSocket;
+        return applicationWebSocket;
     }
     
     public void preInit(UserInstanceContainer userInstanceContainer) {
         this.userInstanceContainer = userInstanceContainer;
         this.userInstance = userInstanceContainer.getUserInstanceById(uiid);
-        
-        final HttpSession session = request.getSession();
-        session.setAttribute(getUserInstanceContainerSessionKey(this.servlet), userInstanceContainer);        
+        if (this.userInstance == null && this.userInstanceContainer.windowSpecificUserInstances) {
+            for (int id = this.userInstanceContainer.getLastUserInstanceId(); id >= 0; id--) {
+                final UserInstance ui = this.userInstanceContainer.getUserInstanceById(Integer.toString(id));
+                if (ui.getApplicaitonWebSocket() == null || ui.getApplicaitonWebSocket() == applicationWebSocket) {
+                  this.uiid = ui.getId();
+                  this.userInstance = ui;
+                  break;
+                }
+            }
+        }
+       
+        request.getSession().setAttribute(getUserInstanceContainerSessionKey(this.servlet), userInstanceContainer);
+
+        if (this.userInstanceContainer == null || this.userInstance == null) {
+            throw new RuntimeException("WSConnection is not preinitialized!");
+        }
     }
     
     public void postInit(ApplicationWebSocket appws) {
-        if (this.userInstanceContainer == null) {
-            throw new Error("WSConnection is not preinitialized!");
-        }
-        
         this.applicationWebSocket = appws;
-        final HttpSession session = request.getSession();
-        session.setAttribute(getWebSocketSessionKey(this.servlet), this.applicationWebSocket);
+        request.getSession().setAttribute(getWebSocketSessionKey(this.servlet), this.applicationWebSocket);
         
         this.userInstance.initWS(this);
     }

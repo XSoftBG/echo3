@@ -48,9 +48,6 @@ public abstract class WebSocketConnectionHandler {
     /** A <code>ThreadLocal</code> reference to the <code>HTTPConnection</code> relevant to the current thread. */ 
     private static final ThreadLocal activeConnection = new ThreadLocal();
   
-    /** Request parameter identifying requested <code>UserInstance</code>. */
-    public static final String USER_INSTANCE_ID_PARAMETER = "uiid";
-           
     /**
      * Returns a reference to the <code>WSConnection</code> that is 
      * relevant to the current thread, or null if no connection is relevant.
@@ -75,17 +72,13 @@ public abstract class WebSocketConnectionHandler {
         WSConnection conn = null;
         try {
             conn = new WSConnection(servlet, request, protocol);
-            // Log.log("WSCH: process!");
+            activeConnection.set(conn);
             if (!conn.isReady()) {
-                // Log.log("WSCH: process [new web socket]!");
                 final HttpSession session = request.getSession();
                 if (session == null) {
                     throw new RuntimeException("WebSocketConnectionHandler: initialization of WSConnection is impossible without session!");
                 }
-                final String key = AbstractConnection.getUserInstanceContainerSessionKey(this.parent);
-                final UserInstanceContainer userInstanceContainer = (UserInstanceContainer) session.getAttribute(key);
-                
-                conn.preInit(userInstanceContainer);
+                conn.preInit((UserInstanceContainer) session.getAttribute(AbstractConnection.getUserInstanceContainerSessionKey(this.parent)));
                 conn.postInit(newApplicationWebSocket(conn.getUserInstance().getApplicationInstance()));
             }
             
@@ -95,7 +88,7 @@ public abstract class WebSocketConnectionHandler {
         }
         finally {
             activeConnection.set(null);
-            return conn.getApplicationWebSocket();
+            return conn != null ? conn.getApplicationWebSocket() : null;
         }
     }
     
@@ -109,8 +102,7 @@ public abstract class WebSocketConnectionHandler {
      * @throws IOException
      */
     private void processError(HttpServletRequest request, Exception ex) {
-        String exceptionId = Uid.generateUidString();
-        Log.log("Server Exception. ID: " + exceptionId, ex);
+        Log.log("Server Exception. ID: " + Uid.generateUidString(), ex);
         throw new RuntimeException(ex);
     }
     

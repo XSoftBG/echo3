@@ -29,7 +29,9 @@
 
 package nextapp.echo.webcontainer.sync.component;
 
+import nextapp.echo.app.Component;
 import nextapp.echo.app.Panel;
+import nextapp.echo.app.util.Context;
 
 /**
  * Synchronization peer for <code>Panel</code>s.
@@ -50,5 +52,13 @@ public class PanelPeer extends CompositePeer {
      */
     public Class getComponentClass() {
         return Panel.class;
+    }
+
+
+    public Object getOutputProperty(Context context, Component component, String propertyName, int propertyIndex) {
+        if (propertyName.equals(Panel.PROPERTY_OVERFLOW))
+          return ((Panel)component).getOverflow().ordinal();
+        else
+          return super.getOutputProperty(context, component, propertyName, propertyIndex);
     }
 }

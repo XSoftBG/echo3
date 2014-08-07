@@ -66,7 +66,7 @@ public class Connection extends AbstractConnection {
     protected void storeUiid() {
         WebContainerServlet webContainerServlet = (WebContainerServlet) this.servlet;        
         if (webContainerServlet.getInstanceMode() == WebContainerServlet.INSTANCE_MODE_WINDOW) {
-            uiid = request.getParameter("uiid");
+            uiid = request.getParameter(WebContainerServlet.USER_INSTANCE_ID_PARAMETER);
         }
     }
     

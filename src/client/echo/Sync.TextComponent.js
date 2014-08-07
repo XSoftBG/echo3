@@ -318,13 +318,13 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             this.input.value = this.component.get("text");
             return;
         }
-        this._processInput();
+        if (this._deferred_doaction || !this._focused)
+          this._processInput();
         // All-clear, store current text value.
         this.component.set("text", this.input.value, true);
         this._lastProcessedValue = this.input.value;
         this._processEmptyListener();
-        if( this._deferred_doaction )
-        {
+        if (this._deferred_doaction) {
           this.component.doAction();
           this._deferred_doaction = false;
         }
@@ -510,14 +510,14 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         this.sanitizeInput();
         
         var doaction = (keyEvent && keyEvent.keyCode == 13 && keyEvent.type == "keydown");
-        if( doaction || !this._focused )
+        if (doaction || !this._focused)
           this._processInput();
 
         if (!this.client.verifyInput(this.component)) {
             // Component is willing to receive input, but client is not ready:
             // Register listener to be notified when client input restrictions have been removed, 
             // but allow the change to be reflected in the text field temporarily.
-            if( doaction ) this._deferred_doaction = true;
+            if (doaction) this._deferred_doaction = true;
             this.client.registerRestrictionListener(this.component, Core.method(this, this._processRestrictionsClear));
             return;
         }

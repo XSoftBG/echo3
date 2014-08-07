@@ -44,7 +44,7 @@ implements HttpSessionActivationListener, HttpSessionBindingListener, Serializab
     /**
      * The default character encoding in which responses should be rendered.
      */
-    private String characterEncoding = "UTF-8";
+    private final String characterEncoding = "UTF-8";
     
     /**
      * The URI of the servlet.
@@ -54,25 +54,25 @@ implements HttpSessionActivationListener, HttpSessionBindingListener, Serializab
     /**
      * Mapping between client-generated unique browser window identifiers and <code>UserInstance</code> values.
      */
-    private Map clientWindowIdToUserInstance = new HashMap();
+    private final Map clientWindowIdToUserInstance = new HashMap();
     
     /**
      * Mapping between <code>UserInstance</code> identifiers and <code>UserInstance</code> values.
      */
-    private Map idToUserInstance = new HashMap();
+    private final Map idToUserInstance = new HashMap();
     
     /**
      * Mapping between initial request identifiers (as returned by <code>createInitId()</code>) and maps of initial
      * requested parameters retrieved from <code>HttpServletRequest.getParameterMap()</code>.
      */
-    private Map initIdToInitialRequestParameterMap = new HashMap();
+    private final Map initIdToInitialRequestParameterMap = new HashMap();
     
     /**
      * The containing <code>HttpSession</code>.
      */
     private transient HttpSession session;
     
-    private boolean windowSpecificUserInstances;
+    public final boolean windowSpecificUserInstances;
 
     /**
      * Creates a new <code>UserInstance</code>.
@@ -135,13 +135,8 @@ implements HttpSessionActivationListener, HttpSessionBindingListener, Serializab
         }
         UserInstance userInstance = (UserInstance) clientWindowIdToUserInstance.get(clientWindowId);
         if (userInstance == null) {
-            String uiid;
-            
-            if (windowSpecificUserInstances) {
-                uiid = new Integer(nextUserInstanceId++).toString();
-            } else {
-                uiid = null;
-            }
+            final String uiid = windowSpecificUserInstances ? Integer.toString(nextUserInstanceId++) : null;
+
             Map initialRequestParameterMap = (Map) initIdToInitialRequestParameterMap.remove(initId);
             userInstance = new UserInstance(this, uiid, clientWindowId, initialRequestParameterMap); 
             clientWindowIdToUserInstance.put(clientWindowId, userInstance);
@@ -172,7 +167,11 @@ implements HttpSessionActivationListener, HttpSessionBindingListener, Serializab
     synchronized UserInstance getUserInstanceById(String id) {
         return (UserInstance) idToUserInstance.get(id);
     }
-    
+
+    int getLastUserInstanceId() {
+      return nextUserInstanceId > 0 ? nextUserInstanceId-1 : 0;
+    }
+
     /**
      * Returns the default character encoding in which responses should be
      * rendered.

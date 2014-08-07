@@ -52,6 +52,13 @@ implements PropertyPeerFactory {
     private static final Map classLoaderToFactoryMap = new HashMap();
     
     /**
+     * Initialize PropertySerialPeerFactory for current {@link ClassLoader}.
+     */
+    public static void init() {
+        forClassLoader(Thread.currentThread().getContextClassLoader());
+    }
+    
+    /**
      * Creates or retrieves a <code>SerialPeerFactory</code>.
      * 
      * @param classLoader the <code>ClassLoader</code> to use for 
