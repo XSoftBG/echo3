@@ -164,11 +164,15 @@ implements HttpSessionActivationListener, HttpSessionBindingListener, Serializab
      *        the <code>UserInstance</code>'s <code>getId()</code> method
      * @return the <code>UserInstnace</code>, or null if none exists
      */
-    synchronized UserInstance getUserInstanceById(String id) {
+    public synchronized UserInstance getUserInstanceById(String id) {
         return (UserInstance) idToUserInstance.get(id);
     }
 
-    int getLastUserInstanceId() {
+    /**
+     * Retrieves last existing UserInstance Id
+     * @return the <code>UserInstnace Id</code>
+     */
+    public synchronized int getLastUserInstanceId() {
       return nextUserInstanceId > 0 ? nextUserInstanceId-1 : 0;
     }
 
