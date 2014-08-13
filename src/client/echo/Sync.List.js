@@ -238,18 +238,13 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         }
 
         var toolTipText = this.component.render("toolTipText");
-        if( toolTipText )
-        {
-          this._div.title = toolTipText;
-          this._element.title = toolTipText;
+        if( toolTipText ) {
+            this._div.title = toolTipText;
+            this._element.title = toolTipText;
         }
-    },
-
-    /** @see Echo.Render.ComponentSync#renderDisplay */
-    renderDisplay: function() {
         this._renderSelection();
     },
-    
+
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) { 
         Core.Web.Event.removeAll(this._element);
