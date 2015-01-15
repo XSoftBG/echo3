@@ -353,7 +353,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         
         Echo.Sync.Insets.render(this.component.render("insets"), this.div, "padding");
         Echo.Sync.Alignment.render(this.component.render("alignment"), this.div, true, this.component);
-        
+
         var toolTipText = this.component.render("toolTipText");
         if (toolTipText) {
             this.div.title = toolTipText;
@@ -377,7 +377,8 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             Core.Web.Event.add(this.div, "focus", this._processInitEventRef, false);
             Core.Web.Event.add(this.div, "mouseover", this._processInitEventRef, false);
         }
-        
+
+        this.component.focusable = this.component.render("focusable", true);
         parentElement.appendChild(this.div);
     },
     

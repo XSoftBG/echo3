@@ -64,6 +64,7 @@ implements Serializable {
     public static final String STYLE_SHEET_CHANGED_PROPERTY = "styleSheet";
     public static final String WINDOWS_CHANGED_PROPERTY = "windows";    
     public static final String LAST_ENQUEUE_TASK_PROPERTY = "lastEnqueueTask";
+    public static final String KEY_CODE_PROPERTY = "keyCode";
     
     /** 
      * A <code>ThreadLocal</code> reference to the 
@@ -435,7 +436,11 @@ implements Serializable {
             return (Component) focusedComponent.get();
         }
     }
-    
+
+//    public ArrayList<String> getKeyCode() {
+//      return
+//    }
+
     /**
      * Returns the application instance's default 
      * <code>LayoutDirection</code>.
@@ -801,6 +806,10 @@ implements Serializable {
         
         // Perform full refresh: container's synchronization peers may need to provide new localization resources to client. 
         updateManager.getServerUpdateManager().processFullRefresh();
+    }
+
+    public void setKeyCode(Component component, String... newValue) {
+      component.set(KEY_CODE_PROPERTY, newValue);
     }
     
     /**

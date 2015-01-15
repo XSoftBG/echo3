@@ -560,7 +560,7 @@ Echo.Client = Core.extend({
                 // Do nothing in the event no char code is provided for a keypress.
                 return true;
             }
-        } else if (keyCode == 9) {
+        } else if (keyCode == 13) {
                 Core.Web.Event.remove(this.domainElement, "focus", this._processFocus, true);
                 // Process tab keyup event: focus next component in application
                 if (!component || this._keyFocusedComponentId == component.renderId)
