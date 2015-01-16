@@ -13,7 +13,8 @@ Echo.Client = Core.extend({
             "StopError.Message": "This application has been stopped due to an error.",
             "WaitIndicator.Text": "Please wait...",
             "Action.Continue": "Continue",
-            "Action.Restart": "Restart Application"
+            "Action.Restart": "Restart Application",
+            "FocusChanger.KeyCodes": "[9]"
         },
         
         /**
@@ -507,7 +508,7 @@ Echo.Client = Core.extend({
     getWaitIndicator: function() {
         return this._waitIndicator;
     },
-    
+
     /**
      * Listener for application change of component focus:
      * invokes focus() method on focused component's peer.
@@ -545,6 +546,7 @@ Echo.Client = Core.extend({
             keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
         }
 
+        var keyCodes = this.configuration["FocusChanger.KeyCodes"].split(",");
         if (!up) {
             if (keyCode == 8) {
                 // Prevent backspace from navigating to previous page.

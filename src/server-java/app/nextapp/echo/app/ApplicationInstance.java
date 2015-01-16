@@ -34,6 +34,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +46,8 @@ import java.util.Set;
 import nextapp.echo.app.update.ServerUpdateManager;
 import nextapp.echo.app.update.UpdateManager;
 import nextapp.echo.app.util.Uid;
+import nextapp.echo.webcontainer.ClientConfiguration;
+import nextapp.echo.webcontainer.ContainerContext;
 
 /**
  * A single user-instance of an Echo application.
@@ -64,7 +67,6 @@ implements Serializable {
     public static final String STYLE_SHEET_CHANGED_PROPERTY = "styleSheet";
     public static final String WINDOWS_CHANGED_PROPERTY = "windows";    
     public static final String LAST_ENQUEUE_TASK_PROPERTY = "lastEnqueueTask";
-    public static final String KEY_CODE_PROPERTY = "keyCode";
     
     /** 
      * A <code>ThreadLocal</code> reference to the 
@@ -808,8 +810,12 @@ implements Serializable {
         updateManager.getServerUpdateManager().processFullRefresh();
     }
 
-    public void setKeyCode(Component component, String... newValue) {
-      component.set(KEY_CODE_PROPERTY, newValue);
+    public void setFocusChanger(String... keyCodes) {
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        clientConfiguration.setProperty(ClientConfiguration.FOCUS_CHANGER_KEY_CODES, Arrays.toString(keyCodes));
+        ContainerContext containerContext
+          = (ContainerContext) getContextProperty(ContainerContext.CONTEXT_PROPERTY_NAME);
+        containerContext.setClientConfiguration(clientConfiguration);
     }
     
     /**
