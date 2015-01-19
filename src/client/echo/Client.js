@@ -328,7 +328,7 @@ Echo.Client = Core.extend({
         this._inputRestrictionMap[id] = true;
         return id;
     },
-    
+
     /**
      * Displays an error message, locking the state of the client.  The client is unlocked when the user presses an
      * (optionally configurable) action button.
@@ -545,8 +545,10 @@ Echo.Client = Core.extend({
             // If key event is not a keypress, translate value from event and additionally store in _lastKeyCode property.
             keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
         }
+        
+        var keyCodes = this.configuration["FocusChanger.KeyCodes"];
+        keyCodes = keyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
 
-        var keyCodes = this.configuration["FocusChanger.KeyCodes"].split(",");
         if (!up) {
             if (keyCode == 8) {
                 // Prevent backspace from navigating to previous page.
@@ -554,7 +556,7 @@ Echo.Client = Core.extend({
                 if (nodeName != "input" && nodeName != "textarea") {
                     Core.Web.DOM.preventEventDefault(e);
                 }
-            } else if (!press && keyCode == 9) {
+            } else if (!press && keyCodes.indexOf(keyCode.toString()) != -1) {
                 Core.Web.Event.add(this.domainElement, "focus", this._processFocus, true);
             }
         
@@ -562,7 +564,7 @@ Echo.Client = Core.extend({
                 // Do nothing in the event no char code is provided for a keypress.
                 return true;
             }
-        } else if (keyCode == 13) {
+        } else if (keyCodes.indexOf(keyCode.toString()) != -1) {
                 Core.Web.Event.remove(this.domainElement, "focus", this._processFocus, true);
                 // Process tab keyup event: focus next component in application
                 if (!component || this._keyFocusedComponentId == component.renderId)
