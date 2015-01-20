@@ -180,6 +180,11 @@ Echo.Client = Core.extend({
     _removeInputRestrictionListener: null,
 
     /**
+     * Array of key codes
+     */
+    keyCodes: null,
+
+    /**
      * Creates a new Client instance.  Derived classes must invoke.
      */
     $construct: function() { 
@@ -313,7 +318,7 @@ Echo.Client = Core.extend({
             Echo.Client._activeClients.push(this);
         }
     },
-    
+
     /**
      * Registers a new input restriction.  Input will be restricted until this and all other
      * input restrictions are removed.
@@ -478,7 +483,19 @@ Echo.Client = Core.extend({
             }
         }
     },
-    
+
+     /**
+     * Verify that the key code is in the array of key codes.
+     */
+    focusChangerKey: function(keyCodes, keyCode) {
+      for(var i=0; i < keyCodes.length; i++) {
+        if (keyCodes[i] === keyCode) {
+          return true;
+        }
+      }
+      return false;
+    },
+
     /**
      * Force various browsers to redraw the screen correctly.  This method is used to workaround the blank screen bug in 
      * Internet Explorer and the CSS positioning bug in Opera. 
@@ -545,10 +562,13 @@ Echo.Client = Core.extend({
             // If key event is not a keypress, translate value from event and additionally store in _lastKeyCode property.
             keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
         }
-        
-        var keyCodes = this.configuration["FocusChanger.KeyCodes"];
-        keyCodes = keyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
 
+        if(this.keyCodes === null) {
+          this.keyCodes = this.configuration["FocusChanger.KeyCodes"];
+          this.keyCodes = this.keyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
+          this.keyCodes = this.keyCodes.map(Number);
+        }
+        
         if (!up) {
             if (keyCode == 8) {
                 // Prevent backspace from navigating to previous page.
@@ -556,7 +576,7 @@ Echo.Client = Core.extend({
                 if (nodeName != "input" && nodeName != "textarea") {
                     Core.Web.DOM.preventEventDefault(e);
                 }
-            } else if (!press && keyCodes.indexOf(keyCode.toString()) != -1) {
+            } else if (!press && this.focusChangerKey(this.keyCodes, keyCode)) {
                 Core.Web.Event.add(this.domainElement, "focus", this._processFocus, true);
             }
         
@@ -564,7 +584,7 @@ Echo.Client = Core.extend({
                 // Do nothing in the event no char code is provided for a keypress.
                 return true;
             }
-        } else if (keyCodes.indexOf(keyCode.toString()) != -1) {
+        } else if (this.focusChangerKey(this.keyCodes, keyCode)) {
                 Core.Web.Event.remove(this.domainElement, "focus", this._processFocus, true);
                 // Process tab keyup event: focus next component in application
                 if (!component || this._keyFocusedComponentId == component.renderId)
