@@ -34,6 +34,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +46,8 @@ import java.util.Set;
 import nextapp.echo.app.update.ServerUpdateManager;
 import nextapp.echo.app.update.UpdateManager;
 import nextapp.echo.app.util.Uid;
+import nextapp.echo.webcontainer.ClientConfiguration;
+import nextapp.echo.webcontainer.ContainerContext;
 
 /**
  * A single user-instance of an Echo application.
@@ -435,7 +438,11 @@ implements Serializable {
             return (Component) focusedComponent.get();
         }
     }
-    
+
+//    public ArrayList<String> getKeyCode() {
+//      return
+//    }
+
     /**
      * Returns the application instance's default 
      * <code>LayoutDirection</code>.
@@ -801,6 +808,18 @@ implements Serializable {
         
         // Perform full refresh: container's synchronization peers may need to provide new localization resources to client. 
         updateManager.getServerUpdateManager().processFullRefresh();
+    }
+
+    public void setFocusChanger(Integer... keyCodes) {
+        if (keyCodes == null || keyCodes.length == 0) {
+            throw new IllegalArgumentException("ApplicationInstance FocusChangerKeyCodes may not be null.");
+        }
+
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        clientConfiguration.setProperty(ClientConfiguration.FOCUS_CHANGER_KEY_CODES, Arrays.toString(keyCodes));
+        ContainerContext containerContext
+          = (ContainerContext) getContextProperty(ContainerContext.CONTEXT_PROPERTY_NAME);
+        containerContext.setClientConfiguration(clientConfiguration);
     }
     
     /**

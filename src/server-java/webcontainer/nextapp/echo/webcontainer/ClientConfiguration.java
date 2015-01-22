@@ -43,6 +43,8 @@ implements Serializable {
     /** Serial Version UID. */
     private static final long serialVersionUID = 20070101L;
 
+    public static final String FOCUS_CHANGER_KEY_CODES = "FocusChanger.KeyCodes";
+
     /**
      * Property name constant for the alert message which should be displayed in
      * the event that a stop error occurs.
