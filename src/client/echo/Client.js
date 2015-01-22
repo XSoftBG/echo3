@@ -182,7 +182,7 @@ Echo.Client = Core.extend({
     /**
      * Array of key codes
      */
-    keyCodes: null,
+    focusKeyCodes: null,
 
     /**
      * Creates a new Client instance.  Derived classes must invoke.
@@ -487,9 +487,9 @@ Echo.Client = Core.extend({
      /**
      * Verify that the key code is in the array of key codes.
      */
-    focusChangerKey: function(keyCodes, keyCode) {
-      for(var i=0; i < keyCodes.length; i++) {
-        if (keyCodes[i] === keyCode) {
+    hasFocusChangerKey: function(keyCode) {
+      for(var i=0; i < this.focusKeyCodes.length; i++) {
+        if (this.focusKeyCodes[i] === keyCode) {
           return true;
         }
       }
@@ -563,10 +563,10 @@ Echo.Client = Core.extend({
             keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
         }
 
-        if(this.keyCodes === null) {
-          this.keyCodes = this.configuration["FocusChanger.KeyCodes"];
-          this.keyCodes = this.keyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
-          this.keyCodes = this.keyCodes.map(Number);
+        if(this.focusKeyCodes === null) {
+          this.focusKeyCodes = this.configuration["FocusChanger.KeyCodes"];
+          this.focusKeyCodes = this.focusKeyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
+          this.focusKeyCodes = this.focusKeyCodes.map(Number);
         }
         
         if (!up) {
@@ -576,7 +576,7 @@ Echo.Client = Core.extend({
                 if (nodeName != "input" && nodeName != "textarea") {
                     Core.Web.DOM.preventEventDefault(e);
                 }
-            } else if (!press && this.focusChangerKey(this.keyCodes, keyCode)) {
+            } else if (!press && this.hasFocusChangerKey(keyCode)) {
                 Core.Web.Event.add(this.domainElement, "focus", this._processFocus, true);
             }
         
@@ -584,7 +584,7 @@ Echo.Client = Core.extend({
                 // Do nothing in the event no char code is provided for a keypress.
                 return true;
             }
-        } else if (this.focusChangerKey(this.keyCodes, keyCode)) {
+        } else if (this.hasFocusChangerKey(keyCode)) {
                 Core.Web.Event.remove(this.domainElement, "focus", this._processFocus, true);
                 // Process tab keyup event: focus next component in application
                 if (!component || this._keyFocusedComponentId == component.renderId)
