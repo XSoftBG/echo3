@@ -73,6 +73,7 @@ public abstract class AbstractButton extends Component {
     public static final String PROPERTY_FOCUSED_FOREGROUND = "focusedForeground";
     public static final String PROPERTY_FOCUSED_ICON = "focusedIcon";
     public static final String PROPERTY_FOCUSED_BOX_SHADOW = "focusedBoxShadow";
+    public static final String PROPERTY_FOCUSABLE = "focusable";
     public static final String PROPERTY_HEIGHT = "height";
     public static final String PROPERTY_ICON = "icon";
     public static final String PROPERTY_ALIGNMENT = "alignment";
@@ -261,6 +262,15 @@ public abstract class AbstractButton extends Component {
      */
     public ImageReference getDisabledIcon() {
         return (ImageReference) get(PROPERTY_DISABLED_ICON);
+    }
+
+    /**
+     * Returns whether the button is focused or not
+     *
+     * @return the focusable
+     */
+    public Boolean getFocusable() {
+      return (Boolean) get(PROPERTY_FOCUSABLE);
     }
 
     /**
@@ -724,6 +734,15 @@ public abstract class AbstractButton extends Component {
      */
     public void setDisabledIcon(ImageReference newValue) {
         set(PROPERTY_DISABLED_ICON, newValue);
+    }
+
+    /**
+     * Sets whether the button is focused or not
+     *
+     * @param newValue the new focusable
+     */
+    public void setFocusable(boolean newValue) {
+      set(PROPERTY_FOCUSABLE, newValue);
     }
 
     /**

@@ -13,7 +13,8 @@ Echo.Client = Core.extend({
             "StopError.Message": "This application has been stopped due to an error.",
             "WaitIndicator.Text": "Please wait...",
             "Action.Continue": "Continue",
-            "Action.Restart": "Restart Application"
+            "Action.Restart": "Restart Application",
+            "FocusChanger.KeyCodes": "[9]"
         },
         
         /**
@@ -179,6 +180,11 @@ Echo.Client = Core.extend({
     _removeInputRestrictionListener: null,
 
     /**
+     * Array of key codes
+     */
+    focusKeyCodes: null,
+
+    /**
      * Creates a new Client instance.  Derived classes must invoke.
      */
     $construct: function() { 
@@ -312,7 +318,7 @@ Echo.Client = Core.extend({
             Echo.Client._activeClients.push(this);
         }
     },
-    
+
     /**
      * Registers a new input restriction.  Input will be restricted until this and all other
      * input restrictions are removed.
@@ -327,7 +333,7 @@ Echo.Client = Core.extend({
         this._inputRestrictionMap[id] = true;
         return id;
     },
-    
+
     /**
      * Displays an error message, locking the state of the client.  The client is unlocked when the user presses an
      * (optionally configurable) action button.
@@ -477,7 +483,19 @@ Echo.Client = Core.extend({
             }
         }
     },
-    
+
+     /**
+     * Verify that the key code is in the array of key codes.
+     */
+    hasFocusChangerKey: function(keyCode) {
+      for(var i=0; i < this.focusKeyCodes.length; i++) {
+        if (this.focusKeyCodes[i] === keyCode) {
+          return true;
+        }
+      }
+      return false;
+    },
+
     /**
      * Force various browsers to redraw the screen correctly.  This method is used to workaround the blank screen bug in 
      * Internet Explorer and the CSS positioning bug in Opera. 
@@ -507,7 +525,7 @@ Echo.Client = Core.extend({
     getWaitIndicator: function() {
         return this._waitIndicator;
     },
-    
+
     /**
      * Listener for application change of component focus:
      * invokes focus() method on focused component's peer.
@@ -545,6 +563,12 @@ Echo.Client = Core.extend({
             keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
         }
 
+        if(this.focusKeyCodes === null) {
+          this.focusKeyCodes = this.configuration["FocusChanger.KeyCodes"];
+          this.focusKeyCodes = this.focusKeyCodes.replace('[','').replace(']','').replace(' ', '').split(",");
+          this.focusKeyCodes = this.focusKeyCodes.map(Number);
+        }
+        
         if (!up) {
             if (keyCode == 8) {
                 // Prevent backspace from navigating to previous page.
@@ -552,7 +576,7 @@ Echo.Client = Core.extend({
                 if (nodeName != "input" && nodeName != "textarea") {
                     Core.Web.DOM.preventEventDefault(e);
                 }
-            } else if (!press && keyCode == 9) {
+            } else if (!press && this.hasFocusChangerKey(keyCode)) {
                 Core.Web.Event.add(this.domainElement, "focus", this._processFocus, true);
             }
         
@@ -560,7 +584,7 @@ Echo.Client = Core.extend({
                 // Do nothing in the event no char code is provided for a keypress.
                 return true;
             }
-        } else if (keyCode == 9) {
+        } else if (this.hasFocusChangerKey(keyCode)) {
                 Core.Web.Event.remove(this.domainElement, "focus", this._processFocus, true);
                 // Process tab keyup event: focus next component in application
                 if (!component || this._keyFocusedComponentId == component.renderId)
