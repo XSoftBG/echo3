@@ -810,7 +810,11 @@ implements Serializable {
         updateManager.getServerUpdateManager().processFullRefresh();
     }
 
-    public void setFocusChanger(String... keyCodes) {
+    public void setFocusChanger(Integer... keyCodes) {
+        if (keyCodes == null || keyCodes.length == 0) {
+            throw new IllegalArgumentException("ApplicationInstance FocusChangerKeyCodes may not be null.");
+        }
+
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         clientConfiguration.setProperty(ClientConfiguration.FOCUS_CHANGER_KEY_CODES, Arrays.toString(keyCodes));
         ContainerContext containerContext
