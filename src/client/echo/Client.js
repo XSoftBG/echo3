@@ -180,7 +180,8 @@ Echo.Client = Core.extend({
     _removeInputRestrictionListener: null,
 
     /**
-     * Array of key codes
+     * Sets the buttons for changing the focus of the component.
+     * @type Array(Integer)
      */
     focusKeyCodes: null,
 
@@ -484,18 +485,6 @@ Echo.Client = Core.extend({
         }
     },
 
-     /**
-     * Verify that the key code is in the array of key codes.
-     */
-    hasFocusChangerKey: function(keyCode) {
-      for(var i=0; i < this.focusKeyCodes.length; i++) {
-        if (this.focusKeyCodes[i] === keyCode) {
-          return true;
-        }
-      }
-      return false;
-    },
-
     /**
      * Force various browsers to redraw the screen correctly.  This method is used to workaround the blank screen bug in 
      * Internet Explorer and the CSS positioning bug in Opera. 
@@ -524,6 +513,18 @@ Echo.Client = Core.extend({
      */
     getWaitIndicator: function() {
         return this._waitIndicator;
+    },
+
+    /**
+     * Varify if the pressed button is a set button for changing the focus of the component.
+     */
+    hasFocusChangerKey: function(keyCode) {
+      for(var i=0; i < this.focusKeyCodes.length; i++) {
+        if (this.focusKeyCodes[i] === keyCode) {
+          return true;
+        }
+      }
+      return false;
     },
 
     /**

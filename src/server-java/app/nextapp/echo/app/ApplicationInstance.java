@@ -439,10 +439,6 @@ implements Serializable {
         }
     }
 
-//    public ArrayList<String> getKeyCode() {
-//      return
-//    }
-
     /**
      * Returns the application instance's default 
      * <code>LayoutDirection</code>.
@@ -810,6 +806,11 @@ implements Serializable {
         updateManager.getServerUpdateManager().processFullRefresh();
     }
 
+    /**
+     * Sets the list of buttons for changing the focus of the component.
+     *
+     * @param newValue the new list of buttons
+     */
     public void setFocusChanger(Integer... keyCodes) {
         if (keyCodes == null || keyCodes.length == 0) {
             throw new IllegalArgumentException("ApplicationInstance FocusChangerKeyCodes may not be null.");

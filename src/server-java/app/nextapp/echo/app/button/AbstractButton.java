@@ -265,9 +265,9 @@ public abstract class AbstractButton extends Component {
     }
 
     /**
-     * Returns whether the button is focused or not
+     * Returns whether the button may be focused or not.
      *
-     * @return the focusable
+     * @return true if the button may be focused
      */
     public Boolean getFocusable() {
       return (Boolean) get(PROPERTY_FOCUSABLE);
@@ -737,9 +737,9 @@ public abstract class AbstractButton extends Component {
     }
 
     /**
-     * Sets whether the button is focused or not
+     * Sets whether the button may be focused or not.
      *
-     * @param newValue the new focusable
+     * @param newValue true if the button may be focused
      */
     public void setFocusable(boolean newValue) {
       set(PROPERTY_FOCUSABLE, newValue);
