@@ -328,8 +328,7 @@ implements Serializable {
      */
     private void doValidation(Component c) {
         c.validate();
-        int size = c.getComponentCount();
-        for (int index = 0; index < size; ++index) {
+        for (int index = 0; index < c.getComponentCount(); index++) {
             doValidation(c.getComponent(index));
         }
     }
