@@ -370,24 +370,24 @@ Echo.Application = Core.extend({
             newValue = newValue.parent;
         }
         
+        if (this._focusedComponent == newValue) {
+            return;
+        }
+
         // Verify new focused component is within modal context.
-        if (this._modalComponents.length > 0) {
+        if (newValue != null && this._modalComponents.length > 0) {
             var modalContextRoot = this.getModalContextRoot();
             if (!modalContextRoot.isAncestorOf(newValue)) {
                 // Reject request to focus component outside of modal context.
                 return;
             }
         }
-        
-        if (this._focusedComponent == newValue) {
-            return;
-        }
-        
+                
         this._focusedComponent = newValue;
         this._listenerList.fireEvent({type: "focus", source: this, oldValue: oldValue, newValue: newValue });
 
-        if( oldValue != null )
-          if( this.client.hasRestrictionListener(oldValue) )
+        if (oldValue != null)
+          if (this.client.hasRestrictionListener(oldValue))
           {
             this.client.registerRemoveInputRestrictionListener( Core.method(this, this._removeInputRestrictionListener) );
             this._pending_lfevents.push(oldValue);
@@ -395,7 +395,7 @@ Echo.Application = Core.extend({
           else
             oldValue.lostFocus();
 
-        if( this._focusedComponent != null )
+        if (this._focusedComponent != null)
           this._focusedComponent.gotFocus();
     },
     
@@ -3790,6 +3790,7 @@ Echo.WindowPane = Core.extend(Echo.Component, {
      * Processes a user request to close the window.
      */
     userClose: function() {
+        this.application.setFocusedComponent(null);
         this.fireEvent({type: "close", source: this});
     },
     

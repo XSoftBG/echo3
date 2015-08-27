@@ -328,8 +328,7 @@ implements Serializable {
      */
     private void doValidation(Component c) {
         c.validate();
-        int size = c.getComponentCount();
-        for (int index = 0; index < size; ++index) {
+        for (int index = 0; index < c.getComponentCount(); index++) {
             doValidation(c.getComponent(index));
         }
     }
@@ -438,10 +437,6 @@ implements Serializable {
             return (Component) focusedComponent.get();
         }
     }
-
-//    public ArrayList<String> getKeyCode() {
-//      return
-//    }
 
     /**
      * Returns the application instance's default 
@@ -810,6 +805,11 @@ implements Serializable {
         updateManager.getServerUpdateManager().processFullRefresh();
     }
 
+    /**
+     * Sets the list of buttons for changing the focus of the component.
+     *
+     * @param newValue the new list of buttons
+     */
     public void setFocusChanger(Integer... keyCodes) {
         if (keyCodes == null || keyCodes.length == 0) {
             throw new IllegalArgumentException("ApplicationInstance FocusChangerKeyCodes may not be null.");
